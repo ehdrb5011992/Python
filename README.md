@@ -1,4 +1,4 @@
 # Python
 
-# 한글
-# eng
+한글
+eng
