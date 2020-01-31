@@ -1,0 +1,46 @@
+<2019.9.3(화) 공지>
+1. 다음 스터디 일자 : 9/6 (금) // 장소 :  정경관 509-B호
+
+2. 숙제 : 
+    1)  https://hunkim.github.io/ml/ 
+        시즌1-딥러닝의 기본 동영상(15분 내외) 7개 수강하기.  (40-46)
+        ( [Recurrent Neural Network] 까지)
+
+    2) 동영상 : [Convolutional Neural Networks] 까지
+        들은 동영상 내용 복습하기. (34-39)
+
+3. 전달사항: 
+- 딥러닝 마지막 스터디가 끝나면, 학기중 스터디에 대한 논의도 같이 진행할 예정입니다.
+- 스터디 시간(대실 시간)은 11:00 - 13:00 입니다.
+- RNN에 대한 강의를 못듣는 인원은 앞의 내용을 차례대로 최대한 듣고 옵니다.
+ 
+그 외..
+- 강의를 듣고 개인적인 공부를 반드시 해주시길 바랍니다. 
+- 수강 및 공부 후 모르는것은 스터디 시간에 같이 의견교류를 할 예정입니다.
+- 깃헙에가면 파이참, 주피터, 데이터 등이 올라와있고 ppt는 위의 https://hunkim.github.io/ml/ 에서 보면 됩니다.
+- 숙제가 있는 경우, 통일성을 위해 파일이름을 연.월.일(요일)을 앞에 반드시 집어 넣습니다.
+
+------------------------------------------------------------------------
+- 신우영님이 올리신 자료(ESL_zip , labs)는 배포를 금합니다.
+- 만약 해당시간에 불참하는 경우, 단톡방에 글을 올려주시면 됩니다. 
+- 자료들은 Google Drive 공유문서함을 참고하시면 됩니다.
+------------------------------------------------------------------------
+
+4. 참고자료 : 
+- Deep Learning 동영상 Github - https://github.com/hunkim/DeepLearningZeroToAll
+- Python packages 소개 및 설명 :  https://datascienceschool.net/view-notebook/b85212ea4040408e8ebd6d3495f2c91b/
+- 그밖의 기타 modules 소개 사이트 : https://jangjy.tistory.com/250
+- Mnist data : 1) 데이터 설명 : https://pythonkim.tistory.com/46 , 
+                   2) 데이터 열어보기 : https://m.blog.naver.com/PostView.nhn?blogId=acwboy&logNo=220584307823&proxyReferer=https%3A%2F%2Fwww.google.com%2F
+-데이터 표준화 방법들 : https://medium.com/@swethalakshmanan14/how-when-and-why-should-you-normalize-standardize-rescale-your-data-3f083def38ff
+-batch size 크기에 따른 장단점 : https://blog.naver.com/qbxlvnf11/221449595336
+
+<Curriculum>
+8/13(화) : [Linear Regression cost함수 최소화] 까지 
+8/16(금) : [Logistic (Regression) Classification]의 [TensorFlow 에서의 구현] 까지
+8/20(화) : [ML의 실용과 몇가지 팁 강의] 의 [Lab 2: Meet MNIST dataset] 까지
+8/23(금) : [Neural Network 1: XOR 문제와 학습방법, Backpropagation (1986 breakthrough)] 의 [실습2: Tensor Board로 딥네트웍 들여다보기]  까지
+8/27(화) : [Neural Network 2: ReLU and 초기값 정하기 (2006/2007 breakthrough)] 까지
+8/30(금) : [Convolutional Neural Networks] 까지
+9/3(화) : [Recurrent Neural Network] 까지
+9/6(금) : [[보너스3] Google Cloud ML을 이용해 TensorFlow 실행하기] 까지
