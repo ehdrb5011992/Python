@@ -1,0 +1,72 @@
+CNN(convolutional Neural Network)에 대해 알아보자.
+[김성훈교수님의 CNN 필기를 적은 txt를 읽으면 더 도움이 된다.]
+
+입력 이미지가 있고 convolutions이라는 연산이 시행되면
+Convolutional feature maps이 튀어나온다. 그 뒤 Subsampling을 한다.
+Subsampling이란, 이미지 영역에서 정보를 압축하는 것이다. 이런 행위를 반복한다.
+
+Fully connected = Dense layer 이며, CNN은
+Convolution + Subsampling + Fully connected로 이루어짐.
+
+CNN은,
+즉, convolutions과 subsampling을 통해서 *feature extraction* 을 해준다.
+이 개념은, 특정 부분을 뽑아내서 그 feature들의 조합으로 물체를 구분하게 된다.
+그 중요한 부분을 뽑아내는게 feature extraction을 함.
+
+그리고 우리는 그 특징들을 가지고 구분을 시행하게 되고, 그게 classifier이며 
+Fully connected로 진행하게 됨.
+
+-----------------------------------------------------------------------
+
+왜 잘될까??
+
+일반적으로 CNN이 잘되는 이유는
+
+1. Local invariance 
+동일한 convolution filter 가 전 이미지를 훑기 때문에 사진의 물체의 위치에 따라서 변하는 상황이 나오지 않는다. 
+
+2. Compositionality
+이미지가 주어지면 거기에 convolution이 반복적으로 층층이 쌓이게 되며, 
+이를 compositionality라고 한다.
+
+-----------------------------------------------------------------------
+
+convolution이란, 데이터와 필터를 곱해서 더하는 행동으로 결과값을 뽑아내는 것.
+즉, 내가 지금 가지고 있는 convolution filter와 그 filter에 해당하는 구역의 사진이 얼마나 비슷한지를 행하는 연산이다. 물론 filter는 학습을 통해 개선됨.
+
+CNN이 능숙하려면 용어들에 능숙해야함.
+
+-zero-padding
+어떤 이미지가 있을 때 가장자리에서도 convolution연산을 하고싶을 때 수행하는 행위.
+-stride
+convolution을 시행할 때 건너뛰는 칸의 수.
+만약 stride size가 filter size와 동일하다면, 겹치는 영역이 없이 convolution을 진행하게 됨. 
+
+[in_channel , out_channel은 강의에서 설명하기 위해 구별해놓은 용어로, 정석적인것은 아니다.]
+!!주의해야 할 점은 필터의 in_channel은 이미지와 동일한 in_channel이어야 한다.
+(channel은 대표적으로 RGB가 될 수 있음.)
+
+out_channels은 필터의 개수라고 생각하면 쉽다.
+
+parameter의 수는 필터에서 요구되는 변수값으로, 적으면 적을수록 좋은 값이다.
+우리는 이 parameter을 갱신시켜나가면서 모형을 학습시키는거임.
+ex) 만약 3*3*3 필터가 7개 있다면, parameter의 수는 3*3*3*7=189 이다.
+
+-----------------------------------------------------------------------
+
+convolution -> + bias -> activation -> pooling 을 하나의 기본 과정으로 본다.
+bias는 1 * 1 * filter 차원을 갖게 됨.
+이렇게 pooling까지 끝나면 reshape을 통해 fully connected layer로 바꾼다.
+마지막 fully connected layer에서 output 분류를 하는 과정은 간단하다. 
+
+fully connected layer에서 n차원이고 output이 m차원 이면 n*m차원 행렬을 도입하고 bias(1*m)텀을 도입하여 y_{1*m} = X_{1*n}W_{n*m}  + b_{1*m} 을 통해  m개의 분류를 진행하게 됨.
+
+여기서 알아야 할 점은 convolution layer을 정의하는 parameter는 fully connected에서 정의하는 parameter보다 압도적으로 작다. 
+NN은 parameter수가 적은게 큰 관심사 이다. 
+따라서 최근 트랜드는 fully connected 층을 없애는 fully convolution network를 구성한다.
+아니면 뒤의 fully connected layer을 매우 많이 간소화 하려고 한다.
+
+기본적으로 학습의 효율(모형의 효율)성을 위해 parameter를 줄이려고 노력하는 자세가 필요함을 잊지 말자.
+
+
+
