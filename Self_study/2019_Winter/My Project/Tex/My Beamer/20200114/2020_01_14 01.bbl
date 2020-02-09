@@ -1,0 +1,31 @@
+\begin{thebibliography}{1}
+
+\bibitem{FER2013_voting}
+Yang Fei and Guo Jiao.
+\newblock Research on facial expression recognition based on voting model.
+\newblock In {\em IOP Conference Series: Materials Science and Engineering},
+  volume 646, page 012054. IOP Publishing, 2019.
+
+\bibitem{FER2013_report}
+Ian~J Goodfellow, Dumitru Erhan, Pierre~Luc Carrier, Aaron Courville, Mehdi
+  Mirza, Ben Hamner, Will Cukierski, Yichuan Tang, David Thaler, Dong-Hyun Lee,
+  et~al.
+\newblock Challenges in representation learning: A report on three machine
+  learning contests.
+\newblock In {\em International Conference on Neural Information Processing},
+  pages 117--124. Springer, 2013.
+
+\bibitem{FER2013_small}
+Hong-Wei Ng, Viet~Dung Nguyen, Vassilios Vonikakis, and Stefan Winkler.
+\newblock Deep learning for emotion recognition on small datasets using
+  transfer learning.
+\newblock In {\em Proceedings of the 2015 ACM on international conference on
+  multimodal interaction}, pages 443--449. ACM, 2015.
+
+\bibitem{FER2013_ensembles}
+Alessandro Renda, Marco Barsacchi, Alessio Bechini, and Francesco Marcelloni.
+\newblock Comparing ensemble strategies for deep learning: An application to
+  facial expression recognition.
+\newblock {\em Expert Systems with Applications}, 2019.
+
+\end{thebibliography}
