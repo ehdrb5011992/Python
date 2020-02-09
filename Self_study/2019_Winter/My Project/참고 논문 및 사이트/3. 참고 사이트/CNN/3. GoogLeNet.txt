@@ -1,0 +1,8 @@
+1. https://kangbk0120.github.io/articles/2018-01/inception-googlenet-review
+* 2. https://ikkison.tistory.com/86
+3. https://m.blog.naver.com/PostView.nhn?blogId=laonple&logNo=220686328027&proxyReferer=https%3A%2F%2Fwww.google.com%2F
+* 4. https://datascienceschool.net/view-notebook/8d34d65bcced42ef84996b5d56321ba9/
+** 5. https://bskyvision.com/539
+** 6. https://medium.com/coinmonks/paper-review-of-googlenet-inception-v1-winner-of-ilsvlc-2014-image-classification-c2b3565a64e7
+7. https://poddeeplearning.readthedocs.io/ko/latest/CNN/GoogLeNet/
+** 8. https://leedakyeong.tistory.com/entry/%EB%85%BC%EB%AC%B8-GoogleNet-Inception-%EB%A6%AC%EB%B7%B0-Going-deeper-with-convolutions-1

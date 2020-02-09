@@ -1,0 +1,12 @@
+1. http://blog.naver.com/PostView.nhn?blogId=laonple&logNo=221259295035
+2. https://datascienceschool.net/view-notebook/958022040c544257aa7ba88643d6c032/
+3. https://bskyvision.com/644
+4. https://ratsgo.github.io/deep%20learning/2017/10/09/CNNs/
+5. https://dnddnjs.github.io/cifar10/2018/10/09/resnet/
+6. http://openresearch.ai/t/resnet-deep-residual-learning-for-image-recognition/41
+* 7. https://github.com/YBIGTA/DeepNLP-Study/wiki/Day-02-Paper-Review:-ResNet
+* 8. https://curaai00.tistory.com/6
+* 9. https://curaai00.tistory.com/1
+** 10. http://openresearch.ai/t/identity-mappings-in-deep-residual-networks/47
+
+*은 중요도.

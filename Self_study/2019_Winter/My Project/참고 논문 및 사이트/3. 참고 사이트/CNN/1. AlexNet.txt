@@ -1,0 +1,4 @@
+** 1. https://bskyvision.com/421
+2. hhttps://neocarus.tistory.com/entry/AlexNet-CNN-architecture-%EA%B8%B0%EB%B0%98-%EB%AA%A8%EB%8D%B8
+3. https://medium.com/@smallfishbigsea/a-walk-through-of-alexnet-6cbd137a5637 (모수계산)
+** 4. https://seongkyun.github.io/study/2019/01/25/num_of_parameters/ (모수계산2)
