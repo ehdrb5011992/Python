@@ -1,0 +1,5 @@
+\beamer@sectionintoc {1}{Installing tex}{3}{0}{1}
+\beamer@sectionintoc {2}{Include graphics}{4}{0}{2}
+\beamer@sectionintoc {3}{Make tables}{5}{0}{3}
+\beamer@sectionintoc {4}{Referencing article}{7}{0}{4}
+\beamer@sectionintoc {5}{Reference}{11}{0}{5}
