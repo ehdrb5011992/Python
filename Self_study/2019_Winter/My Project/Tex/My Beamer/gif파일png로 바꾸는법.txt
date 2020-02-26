@@ -1,0 +1,12 @@
+imagemagic display 설치후 명령프롬프트에
+
+magick convert -coalesce saddlepoint2.gif saddlepoint2.png
+를 쳐서 바꿈. (destination.gif, destination.png 는 파일이름)
+
+
+
+latex에선,
+1. ocgbase.sty,pdfbase.sty,animate.sty 를 다운받고 \usaepackage로 활용
+2. \animategraphics[loop,controls,scale=0.4]{10}{./else/destination/destination-}{0}{198}
+로 사용.
+(10 은 초당프레임, 0은 파일번호, 198은 최종파일번호)
