@@ -6,3 +6,12 @@
 
 를 택할 수 있겠으나 본 코드에서는 이 방법을 넘겼다.
 대신 일련의 과정들을 통해 각 모형의 Performance가 어떻게 개선되어 나가는지를 탐구해보았다.
+
+
+
+더불어, 살펴본 모형 5개는 다음과 같이 개선되었다.
+
+Step 1. Data augmentation x , 매우 일부분 GPU 사용  <-- Macro f1-score를 살펴본다.
+Step 2. Data augmentation o , TPU 사용 <-- Macro f1-score를 살펴본다.
+Step 3. Data augmentation o , TPU 사용 , Imbalanced Problem 개선 <-- Accuracy를 살펴본다.
+Step 4. Data augmentation o , TPU 사용 , Imbalanced Problem 개선 , Resize = 224 , CNN 모형 최대한 논문과 같이 사용. <-- Accuracy를 살펴본다.
