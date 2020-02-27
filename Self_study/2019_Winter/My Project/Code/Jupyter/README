@@ -12,9 +12,9 @@
 더불어, 살펴본 모형 5개는 다음과 같이 개선되었다.
 
 Step 1. Data augmentation x , 매우 일부분 GPU 사용  <-- Macro f1-score를 살펴본다.
-Step 2. Data augmentation o , TPU 사용 <-- Macro f1-score를 살펴본다.
-Step 3. Data augmentation o , TPU 사용 , Imbalanced Problem 개선 <-- Accuracy를 살펴본다.
-Step 4. Data augmentation o , TPU 사용 , Imbalanced Problem 개선 , Resize = 224 , CNN 모형 최대한 논문과 같이 사용. <-- Accuracy를 살펴본다.
+Step 2. Data augmentation o , GPU 사용 <-- Macro f1-score를 살펴본다.
+Step 3. Data augmentation o , GPU 사용 , Imbalanced Problem 개선 <-- Accuracy를 살펴본다.
+Step 4. Data augmentation o , GPU 사용 , Imbalanced Problem 개선 , Resize = 224 , CNN 모형 최대한 논문과 같이 사용. <-- Accuracy를 살펴본다.
 
 대략적인 결과는 각 Step의 요약파일인 한글파일을 참고하길 바라며,
 세부내용은 각 Jupter Notebook을 들여다보길 바란다.
