@@ -1,0 +1,13 @@
+** 1. https://m.blog.naver.com/PostView.nhn?blogId=isu112600&logNo=221582003889&categoryNo=45&proxyReferer=https%3A%2F%2Fwww.google.com%2F
+* 2. https://tykimos.github.io/2017/06/10/CNN_Data_Augmentation/
+3. https://python.bakyeono.net/chapter-7-4.html (next와 iter)
+4. https://neurowhai.tistory.com/158
+** 5. https://keras.io/ko/preprocessing/image/ (ImageDataGenerator 옵션 설명)
+6. https://m.blog.naver.com/PostView.nhn?blogId=hist0134&logNo=221185103558&proxyReferer=https%3A%2F%2Fwww.google.com%2F (논문요약)
+** 7. https://www.pyimagesearch.com/2019/07/08/keras-imagedatagenerator-and-data-augmentation/
+(keras 의 data augmentation의 진실)
+* 8. https://hwiyong.tistory.com/48 (datagen.fit)
+9. https://3months.tistory.com/199 (flow_from_directory)
+** 10. https://datascience.stackexchange.com/questions/41422/when-using-data-augmentation-is-it-ok-to-validate-only-with-the-original-images (fit_generator에서 validation 를 이용하는 방법)
+11. https://keras.io/models/sequential/ (fit_generator 옵션설명)
+** 12. https://stackoverflow.com/questions/50737814/is-data-augmentation-in-keras-applied-to-the-validation-set-when-using-imagedata (valid_generator 사용)

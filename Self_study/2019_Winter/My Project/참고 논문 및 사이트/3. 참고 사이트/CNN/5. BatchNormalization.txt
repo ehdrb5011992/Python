@@ -1,0 +1,10 @@
+** 1. https://shuuki4.wordpress.com/2016/01/13/batch-normalization-%EC%84%A4%EB%AA%85-%EB%B0%8F-%EA%B5%AC%ED%98%84/
+** 2. https://light-tree.tistory.com/133
+3. https://sacko.tistory.com/44
+4. https://de-novo.org/2018/05/28/batch-normalization-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0/
+5. https://m.blog.naver.com/laonple/220808903260
+6. https://hcnoh.github.io/2018-11-27-batch-normalization
+7. https://nittaku.tistory.com/293
+8. https://seing.tistory.com/10
+9. https://excelsior-cjh.tistory.com/178
+**10. https://goodjian.tistory.com/entry/%EB%B0%B0%EC%B9%98-%EC%A0%95%EA%B7%9C%ED%99%94-%EB%85%BC%EB%AC%B8-%EB%A6%AC%EB%B7%B0-Batch-normalization

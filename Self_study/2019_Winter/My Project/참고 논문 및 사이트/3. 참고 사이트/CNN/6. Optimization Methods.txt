@@ -1,0 +1,24 @@
+* 1. https://seamless.tistory.com/38
+2. https://sacko.tistory.com/42
+3. https://ratsgo.github.io/deep%20learning/2017/04/22/NNtricks/
+4. https://brunch.co.kr/@chris-song/50
+** 5. https://light-tree.tistory.com/133 
+6. http://aikorea.org/cs231n/optimization-1/
+**7. http://shuuki4.github.io/deep%20learning/2016/05/20/Gradient-Descent-Algorithm-Overview.html
+* 8. https://twinw.tistory.com/247
+*9. https://newsight.tistory.com/224
+10. https://medium.com/@shwetaka1988/rmsprop-a-better-way-to-optimize-your-model-bc4eaca33090(rmsprop)
+*11. https://ruder.io/deep-learning-optimization-2017/
+[2017 알고리즘, snapshot ensembles in cyclic lr 소개]
+12. https://tgd.kr/19860071
+[nadam, amsgrad 소개]
+
+
+
+
+
+
+
+
+
+ 
