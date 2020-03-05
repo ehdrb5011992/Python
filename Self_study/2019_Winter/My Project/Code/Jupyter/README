@@ -12,8 +12,8 @@
 더불어, 살펴본 모형 5개는 다음과 같이 개선되었다. 
 전부 GPU를 사용하였다.
 
-Step 1. Data augmentation x <-- Macro f1-score를 중점으로 본다(모형개선 취지).
-Step 2. Data augmentation o <-- Macro f1-score를 중점으로 본다(모형개선 취지).
+Step 1. Data augmentation x <-- Accuracy, Macro f1-score(모형확인) 를 본다.
+Step 2. Data augmentation o <-- Accuracy, Macro f1-score(모형확인) 를 본다.
 Step 3. Data augmentation o , Imbalanced Problem 개선 <-- Accuracy를 살펴본다.
 Step 4. Data augmentation o , Imbalanced Problem 개선 , Resize = 224 , CNN 모형 최대한 논문과 같이 사용. <-- Accuracy를 살펴본다.
 
