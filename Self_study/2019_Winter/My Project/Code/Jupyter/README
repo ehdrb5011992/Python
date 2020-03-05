@@ -19,3 +19,8 @@ Step 4. Data augmentation o , Imbalanced Problem 개선 , Resize = 224 , CNN 모
 
 대략적인 결과는 각 Step의 요약파일인 한글파일을 참고하길 바라며,
 세부내용은 각 Jupter Notebook을 들여다보길 바란다.
+
+
+참고)
+VGG16과 VGG19는 초기값의 영향을 많이 받아 fine tuning을 하였으나, 그래도 학습이 잘 이루어지지는 않았다.
+그러므로 여러번 돌려서 결과가 나오는 값을 출력해놓았다.
