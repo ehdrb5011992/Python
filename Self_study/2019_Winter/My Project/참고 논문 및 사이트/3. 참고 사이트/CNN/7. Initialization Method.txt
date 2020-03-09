@@ -1,0 +1,10 @@
+** 1. https://lsjsj92.tistory.com/404 (cs231n)
+2. initializer weights in a smart way (김성훈교수님강의-RBM)
+3. https://reniew.github.io/13/ 
+4. https://gomguard.tistory.com/184
+5. https://sacko.tistory.com/43
+* 6. https://flonelin.wordpress.com/2018/01/28/weight-initalizer-%EC%A2%85%EB%A5%98/ (가중치종류,특징)
+7. https://hjweide.github.io/orthogonal-initialization-in-convolutional-layers (orthogonal init)
+* 8. https://pathmind.com/wiki/restricted-boltzmann-machine (rbm)
+9. 경북대 강의자료 177슬라이드 (rnn init 살짝)
+10. https://medium.com/@prateekvishnu/xavier-and-he-normal-he-et-al-initialization-8e3d7a087528
