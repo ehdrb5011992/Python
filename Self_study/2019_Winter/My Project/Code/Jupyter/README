@@ -25,4 +25,4 @@ Step 4. Data augmentation o , Imbalanced Problem 개선 , Resize = 224 , CNN 모
 VGG16과 VGG19는 초기값의 영향을 많이 받아 fine tuning을 하였으나, 그래도 학습이 잘 이루어지지는 않았다.
 그러므로 여러번 돌려서 결과가 나오는 값을 출력해놓았다.
 
-또한 Activation Function으로는 전부 ReLU를 사용하였으며, PReLU 나 Leaky ReLU 등을 사용하는 방법도 고려해볼만한 사항이다.
+또한 Activation Function으로는 전부 ReLU를 사용하였으며, PReLU, Leaky ReLU, ELU, maxout등을 사용하는 방법도 고려해볼만한 사항이다.
