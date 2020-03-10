@@ -1,0 +1,47 @@
+\begin{thebibliography}{1}
+
+\bibitem{glorot}
+Xavier Glorot and Yoshua Bengio.
+\newblock Understanding the difficulty of training deep feedforward neural
+  networks.
+\newblock In {\em Proceedings of the thirteenth international conference on
+  artificial intelligence and statistics}, pages 249--256, 2010.
+
+\bibitem{he}
+Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+\newblock Delving deep into rectifiers: Surpassing human-level performance on
+  imagenet classification.
+\newblock In {\em Proceedings of the IEEE international conference on computer
+  vision}, pages 1026--1034, 2015.
+
+\bibitem{rbm}
+Geoffrey~E Hinton.
+\newblock A practical guide to training restricted boltzmann machines.
+\newblock In {\em Neural networks: Tricks of the trade}, pages 599--619.
+  Springer, 2012.
+
+\bibitem{rnnrelu}
+Quoc~V Le, Navdeep Jaitly, and Geoffrey~E Hinton.
+\newblock A simple way to initialize recurrent networks of rectified linear
+  units.
+\newblock {\em arXiv preprint arXiv:1504.00941}, 2015.
+
+\bibitem{lecun}
+Yann~A LeCun, L{\'e}on Bottou, Genevieve~B Orr, and Klaus-Robert M{\"u}ller.
+\newblock Efficient backprop.
+\newblock In {\em Neural networks: Tricks of the trade}, pages 9--48. Springer,
+  2012.
+
+\bibitem{orthogonal}
+Andrew~M Saxe, James~L McClelland, and Surya Ganguli.
+\newblock Exact solutions to the nonlinear dynamics of learning in deep linear
+  neural networks.
+\newblock {\em arXiv preprint arXiv:1312.6120}, 2013.
+
+\bibitem{rnnrelu2}
+Sachin~S Talathi and Aniket Vartak.
+\newblock Improving performance of recurrent neural network with relu
+  nonlinearity.
+\newblock {\em arXiv preprint arXiv:1511.03771}, 2015.
+
+\end{thebibliography}
