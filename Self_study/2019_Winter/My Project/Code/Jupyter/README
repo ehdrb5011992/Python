@@ -14,7 +14,7 @@
 
 Step 1. Data augmentation x <-- Accuracy, Macro f1-score(모형확인) 를 본다.
 Step 2. Data augmentation o <-- Accuracy, Macro f1-score(모형확인) 를 본다.
-Step 3. Data augmentation o , Imbalanced Problem 개선 <-- Accuracy를 살펴본다.
+Step 3. Data augmentation o , Imbalanced Problem 개선 <-- Accuracy를 살펴본다. (개강이후 진행)
 
 대략적인 결과는 각 Step의 요약파일인 한글파일을 참고하길 바라며,
 세부내용은 각 Jupter Notebook을 들여다보길 바란다.
