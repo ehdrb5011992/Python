@@ -1,0 +1,136 @@
+참고 사이트 : 
+http://colah.github.io/posts/2015-08-Understanding-LSTMs/
+https://lsjsj92.tistory.com/411 (RNN)
+
+RNN , 그 안에서도 LSTM에 대해 알아보려고 한다.
+Long Short Term Memory의 약자이고, RNN에서 거의 standard로 사용되고 있다.
+
+RNN은 지금까지 봐온 NN와 가장 큰 차이점이 recurrent connection이다.
+(00:41)
+
+recurrent란, 지금 입력이 들어오면 거기에 어떤 정보를 추가 하는데 
+그 정보는 이전메모리에서 들어온 정보이다. 
+그래서 그 메모리 + 현재 입력을 같이 고려하는 구조이다.
+
+우리가 일반적인 RNN을 사용하는 이유는 시간적으로 서로 correlated되어있는 데이터를 처리하기 위해서 그렇다.
+
+예를들어 The clouds are in the sky. 가 있으면, 
+sky라는 단어를 예측하고 싶다면 in the 까지만 보고선 알 수 없다.
+clouds까지는 봐줘야 sky라는 단어를 예측할 수 있음.
+
+그리고 이걸 더 확장시켜 문장의 깊은 이해를 위해서는,
+한참 전에있는 문장, 수십 페이지 전에 있었던 내용을 알고 있어야 한다.
+그래야 현재의 내용을 올바르게 유추하고 이해할 수 있다.
+그래서 바로 전이 아니라, Longer-Term Dependencies를 잘 해야 한다.
+그리고 우리가 이후에 살펴볼 LSTM이 이 Longer-Term Dependencies에 특화된 방법이라고 볼 수 있다.
+
+그래서 한참 전에 있는 정보도 같이 고려해서 출력을 만들어 보자라는게 LSTM의 목적.
+
+
+
+LSTM에 대해 알아보자.
+
+가장 기본적인 Vanilla RNN에 대해 알아보자. (03:18)
+입력이 들어오면 이전에 받았던 정보와 취합해서 output을 내뱉고,
+그 output을 다음번 cell에 들어가고 다음번 input과 합쳐서 그다음 output을 내뱉는다. 
+tanh를 사용함.
+
+
+만약 LSTM을 사용하게 되면, 안의 구조가 복잡하게 바뀌어야 함. (04:33)
+그리고 우리는 왜 Long Short Term Memory이 긴 시간간격에서와 짧은 시간간격에서 처리가 동시에 가능한지에 대해 이해해야 한다.
+즉, LSTM이 왜 이러한 구조로 되어있는지를 알아야 한다.
+
+
+LSTM의 Notation에 대해 알아보자.
+노란색 사각형은 NN layer이다. weight도 있고, bias도 있다.
+핑크색 원은 pointwise연산이다. (곱하면 하다마드, 더하면 단순 벡터연산)
+선 두개가 합쳐지면 concatenate이며 (수식으로는 덧셈으로 표현됨),
+선 두개가 나눠지면 copy이다. (똑같은게 들어감.)
+
+여기서 우리가 한가지 알 수 있는건, input의 차원과 output의 차원이 동일하다고 생각하다면, 
+concatenate된 부분과 그대로 넘어오는 부분의 차원이 다르다. (06:30) 
+그래서, 이를 노란색 사각형인 NN layer에서 조율해줌. 
+
+전반적인 구조는 (06:53) 참고
+conveyor belt처럼 생겼음.
+
+그리고 자체의 input과는 다른, 두개의 state를 input으로 받는다.
+1) (cell) state
+-절대로 밖으로 빠져나가지 않는다. 그냥 흘러가는것.
+2) hidden state
+- 이전 출력이 바로 hidden state가 된다.
+
+또한 아래와 같은 3개의 gate가 존재한다.
+1) Forget Gate (사실상 유지게이트 가 맞음. 이런 단어 의미를 고려해서 GRU는 '1 -' 연산으로 고려됨)
+2) Input Gate
+3) Output Gate
+
+그래서 이 세가지 Gate가 잘 조합이 되서 long과 short을 잘 고려할수 있게 됨.
+이런 과정을 다 거치면, next (cell) state와 next hidden state로 넘어가게 된다.
+다시 말하지만, output = hidden state임.
+
+Core Idea 는 cell state이다.
+cell state가 흘러간다고 하면, 정보를 여닫는역할을 해주는게 Gate이다.
+
+
+
+
+1) Forget Gate (08:44)
+forget gate의 입력은, 이전 output과 현재 input의 조합으로 이루어짐.
+우리가 이전의 cell state의 값이 c_{t-1} 라고 하고, forget gate를 통과한 값을 f_{t}라고 하자. 
+f_{t} 는 activation function으로 sigmoid를 사용했다.  (0~1)
+그래서 그 값들이 모두 1이면 cell state가 그대로 넘어간다.
+만약 그 값들이 모두 0이면, cell state가 모두 날아간다.
+
+즉, forget gate의 역할은 cell state의 어떤 값들을 버릴지, 줄여버릴지를 정하는 역할이다.
+다시 말해, 입력과 이전출력을 고려해서 cell state의 어떤값을 날릴지를 결정.
+
+
+
+
+2) Input Gate (11:08)
+
+똑같이 이전 output과 현재 input의 조합이 들어간다.
+i_{t}를 sigmoid를 통과한 값, Ct_{t} = tanh를 통과한 값이라고 하자.
+이때 결과값으로 sigmoid (0~1) , tanh (-1~1) 을 출력함을 명심하자.
+
+tanh를 통과하면 -1~1 사이값이 나온다. 이게 일종의 cell state의 후보군이 된다.
+그리고,i_{t}는 Ct_{t}라는 값이 얼마나 반영을 시킬지를 결정해주는 값이다.
+
+그리고 나서 conveyor belt같은 cell state에 값을 더하되, 얼마나 더할지를 결정하는 값이다.
+
+즉, Input Gate는 cell state에 얼마나 반영할지를 결정해준다.
+1)과 2)의 주체는 cell state가 된다.
+
+
+
+
+3) Update (cell state)
+우리가 그러면 이전의 cell state를 forget gate를 통해 얼마나 바꿀지를 결정했고,
+거기에 얼마나 cell state 를 업데이트 할지를 받았으니까 그 두개를 그냥 더하면 된다.
+
+그러면 다음번 cell state값은,
+C_t = f_t * C_{t-1} + i_t * Ct_{t} 로 결정되게 된다.
+
+
+
+
+4) Output Gate
+Output Gate에서는 이렇게 얻어진 cell state의 값을 가지고 어떻게 밖으로 빼낼지, 
+얼마나 빼낼지를 o_{t} 가 해주게 된다.
+
+o_{t} = 이전의 hidden state와, input을 받아서 sigmoid를 통과시켜 영향력을 주게 됨. 
+얼마나 빼낼지에 대한 값.
+
+h_{t} = o_{t} * tanh(C_t)
+
+결국 이 모든것의 목적은, 
+내가 현재 입력과 이전 출력을 가지고 어떻게 cell state에 값을 어떻게 갱신하고, 
+그 갱신한 값을 어떻게 빼낼지를 정해주는 것이다.
+
+복잡해 보이지만, 그래도 실제로 사용할때는 이런걸 전혀 고려할 필요가 없다.
+그냥 내가 입력과 출력을 정해주고, cell state 초기화를 잘 시켜주면 LSTM 모듈을 가져다가 쓸 수 있음.
+
+GRU도 있고 Vanilla RNN도 있음. 
+GRU도 마찬가지로 사용할때 안에있는 내용물을 볼 일은 없을 것이다.
+

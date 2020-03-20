@@ -1,0 +1,403 @@
+Visual Q&A는
+image가 주어져 있고 그 이미지를 질문이 있을 때 그 정답을 찾는 문제.
+
+DPPnet이 처음 나왔을 때의 데이터는 4종류의 data set 있었음.
+지금은 더 많은 dataset이 있다.
+
+2015년 당시에, 25만장의 image와 76만개의 질문 이 VQA에 있었음(01:26)
+그리고 데이터셋이 어떻게 만들어졌는지가 중요하다.
+데이터셋은 사람은 맞출 수 있지만, 
+로봇은 못맞출 것 같은 질문을 만들고, 정답도 만들어 봐라 라는 목적에 맞게 만들어짐.
+
+24.8만개의 training, 12.1만개의 valid, 24.4 만개의 test 데이터이고 문제당 10개의 정답이 있음.
+(데이터 셋의 이름이 뭔지 확인)
+대부분의 경우 질문은 1개단어가 많고(89% 비율), 2단어, 3단어 등등도 있다.
+
+어쨋든 정답들이 모두 주어져 있고, 문제와 정답이 있기 때문에
+Automatic Evaluation 이 가능하다.
+
+
+
+VQA dataset example
+예를들어 보자. 늘 사진이 주어지고, 이에 따른 질문을 한다.
+코끼리 사진이 주어졌다면 -> Q: what animals is this?
+개 사진이 주어졌다면 -> Q: How many dogs are seen? (어려운 문제)
+
+단순히 정답만 찾는것이 아닌, 맞는 설명의 정답을 찾아야함.
+물론, 같은 이미지에 대해 질문이 달라지면 다른 정답을 말할 수 있음.
+
+차가 여러개 있는 사진이 주어진다면 -> Q: what color is the car? (어려운문제)
+버스를 자동차라고 안친다면 초록색이겠지만,
+그게 아니라면 찾기가 어렵다.
+
+피자 사진이 주어진다면 -> Q: Is this vegetarian pizza? (어렵다)
+인물사진+바나나 -> Q: what is the mustache made of? (매우 어려운 질문)
+(수염이 뭔지도 알아야하고, 어딨는지도 알아야하고, 바나나가 뭔지도 알아야함.)
+
+그래서 VQA Dataset은 굉장히 쉬운 문제들로 이루어져있음.
+난이도는 3-4세(15.3%) / 5-8세(39.7%) / 9-12세(28.4%) / 13-17세(11.2%) / 18+ (5.5%)에 해당한다. 
+질문수준을 보려면 (03:53)
+
+
+
+
+Evaluation 은 아까말했던 Automatic evaluation이 가능함.
+open ended question은 정답이 주어지지 않고, 알아서 맞춰봐라
+multiple choice는 정답 후보중에 하나를 골라라.
+
+Evaluation Metric은 
+Acc(ans) = min{ (# humans that said ans) / 3 , 1 } 최대정확도를 1로 제한함.
+사람이 정답이라고 말한것들과 비교해 실제로 맞춘거를 계산해서 3으로 나눈것.
+이렇게 한 이유는, 하나의 질문이라 하더라도 정답이 여러개 일수 있기 때문에 그렇다.
+(???? 이게 무슨소릴까 공부해보기)
+
+VQA가 여러가지 문제들로 이루어져있고, 이 문제들이 중요한 이유가 뭐냐면
+어떤 이미지에 질문에 대한 답이 그 이미지를 설명하는 속성이기 때문에 그럼.
+
+좀 더 자세히 말하면, 
+이제 이미지를 보면 강아지라고 구별하는 것과 어디에 있는지를 말하는건 쉽다.
+다만, 이제 이미지를 보면 사람처럼 생각하길 원하는거임.
+
+
+VQA의 대표적인 문제는 관계를 찾는 문제임. 혹은 추론문제.
+만약 spatial한 relationship을 잘 푸는 VQA 알고리즘(혹은 network)이 하나 있다면, 
+미리 가지고 있는 데이터 셋을 다 돌려가면서 VQA알고리즘을 통해
+이 이미지에 대한 속성을 매길 수 있음.
+
+그러면 이 속성을 가지고 사람이 원하는 어떤 query가 들어왔을 때 잘 찾아 줄 수 있다.
+구글에서 활발히 연구하고 있는 이유중 하나임.
+
+
+
+Sub-problems in Image QA (06:46)
+VQA의 여러 문제들, 혹은 어떤 의미들을 갖는지 하나하나씩 살펴보도록 하자.
+
+
+
+<Classification with Complex Setting>
+1. multi-domain classfication 라고도 하는 문제.
+즉, 동시에 다양한 분류를 진행해야함.
+
+우리가 어떤 데이터 셋을 만드는 목적이 뭐냐면(분류문제),
+우리가 애초에 이 이미지가 어떤 class로 분류가 될 것이라고 가정하고 있다.
+그리고 이 이미지는 1개 이상의 답을 가지고 있다. 
+
+ex) 사람이 점프하고 있는 사진을 통해 (07:58)
+Q1 -> what is this? : person
+Q2 -> What is she doing? : jumping
+
+맞는 답을 해줘야 한다.
+바꿔 말하면 내가 어떤 분류기를 쓸지가 질문에 의존하게 된다.
+그래서 object classification(person에 답하는)과 action classification(jumping에 답하는)이 있게 되는 것이다.
+
+그래서 두개가 다 섞여있는 unified classifier를 만들어야 한다.
+그런데 이렇게 하게 되면 또 다른 문제가 생긴다.
+
+
+2. classification with input/output connection (08:19)
+input/output connection이 생길 수 있다. (???)
+분류 문제가 아니라, is this~ 형이면, yes / no 인 답도 있어야함.
+
+
+3. Zero Shot Learning
+일반적으로 zero shot learning이라고 한다면, 
+한번도 본 적이 없는 데이터를 어떻게 찾을까 에 대한 이야기.
+
+one shot learning인 한번본것을 학습하는것.
+
+예를 들어보자.
+dog / cat들이 무더기로 있는 사진이 있는데,
+갑자기 펭귄을 찾아봐라 라고 물어보는거임.
+
+혹은 질문에 질문에 펭귄이 있는거임. 
+얘를 어떻게 처리할지 혹은 펭귄'들'이 있냐고도 물어볼 수 있음.
+
+혹은 많은 cat사진들이 있는데, 이 사진이 kitty 냐고도 물어볼 수 있음.
+
+즉, 세상에는 무한한 단어들이 있는데 이 단어가 들어왔을 때, 
+한번도 학습하지 않은 정보에 대해서 어떻게 처리를 할건지에 대한 여부를 생각해야 한다.
+
+
+
+
+
+< Novel Computer Vision Task>
+1. Reference Problem
+어떤걸 지칭하는지에 따라서 다른 정답을 내야하는 문제
+ex) 어떤 이미지에서 (10:18) 
+what color is the cup? / teapot? / spoon?
+color를 물어보는 문제는 같지만, 다른 목적어가 들어옴에 따라 다른 정답을 내야한다.
+
+이건 오히려 detection문제와도 거의 비슷하다. 각각의 물체가 어딨는지를 알아야 색깔을 나타냄. 
+그래서 이것은 computer vision problem 을 푸는 문제를 여기서 그대로 적용하게 된다.
+
+
+2. Spatial Relation Problem
+어떤 물체가 어떤 물체 옆에 있는지를 알아야 한다.
+ex)
+what is behind the horse?
+-> behind를 알아야 하고, horse가 뭔지를 알아야 함.
+
+
+3. Visual semantic role labeling
+ex)
+what is the man throwing?
+-> 던진다가 무엇인지를 알아야하고, 남자가 무엇인지도 알아야 한다.
+(동작에 관한 이야기)
+
+4. Weakly supervised learning to count
+counting문제가 정말정말 어려운 문제이다.
+ex)
+How many people?
+
+이 counting이 어려운 이유가 무엇이냐면, 
+우리가 이미지를 처리할때 CNN을 가지고 처리하지만, CNN자체가 counting에 그렇게
+적합한 구조는 아니다.
+
+왜냐면 counting이라는 건 이미지 안에서 굵직한 물체가 어딨는지를 알아야 하는데,
+CNN은 동일한 filter가 전체 이미지를 훑는다. 그렇게 얻은 정보가 fc 층에 들어가면 공간정보가 사라짐.
+
+그래서 사람이 시도하는 물체를 센다는 행위는 feed forward로 한번에 흘러가는 CNN에는 적합하지 않다.
+
+
+<Data Efficiency Problem>
+1. Operation Compositionality
+이 부분이 바로 VQA에서 굉장히 hot한 분야이다.
+
+우리가 실질적으로 여러개의 문제를 푼다고 하면 그것들이 우리안에서는 정리가 된다.
+예를들면, class문제를 생각해보자.
+
+ex) 이것은 고양입니까? 사람입니까?
+-> 우리는 질문을 통해 고양이 어떤건지, 사람이 어떤건지를 깨달을 수 있다.
+ex) 사람이 몇명있습니까? 고양이가 몇마리 있습니까?
+-> 고양이가 뭔지를 알기 때문에 대답이 가능하다.
+
+
+
+
+이제 다음을 고려해보자.
+training data에 강아지가 몇마리 있습니까? 가 없다고 하고,
+test data에 강아지가 몇마리 있습니까? 라는 질문이 있다고 해보자.
+
+이 문제를 풀기 위해서는 다음의 두가지에 대한 composition이 있어야 한다.
+->이미지 안에서 어떤 물체를 구별할 수 있을지에 대한 generalize가 필요하고 counting에 대한 generalize가 필요하다.
+
+그런데 보통 의미나 동작이 composition이 되어서 문제를 풀려고 하면 그 solution이 굉장히 어렵다.
+근데 이게 안된다면 우리는 모든 물어볼 문제에 대한 경우의 수를 전부 고려해야만 한다.
+학습데이터가 굉장히 커지는것임.
+
+근데, 만약 VQA가 composition이 가능하다면, 실질적으로 더 적은 dataset만 가지고도
+학습이 가능하다.
+
+즉 위의 내용을 요약하자면,
+training에는
+how many A?  / how many B?  + is this A? / is this B? / is this C? 가 있다면,
+test에서 how many C? 에 대한 답을 할 수 있어야 한다.
+
+근데 이게 잘 되지가 않는다.
+또는, 문제를 나눠서 바라봐 학습하는것도 가능해야 한다.
+
+ex) (15:54)
+이미지가 말 위에 타있는 사람그림이라면,
+what the man on the horse is doing? 에서,
+man을 알아야하고, on the라는 위치를 알아야하고, horse를 알아야하고, doing을 알아야 함.
+
+reference problem : man horse
+spatial relation : on the
+classification : doing 
+이런걸 다 generalize 해서 할 수 있어야 문제를 해결할 수 있음.
+
+물론, 마지막으로 우리가 image만 다루는게 아니라 이미지와 질문을 같이 다루고 있다.
+그래서 질문을 잘 이해하는 자연어 처리를 다룰줄 알아야 한다.
+현재 질문쪽은 상대적으로 덜 주목을 받는게, 
+VQA하는 사람들이 보통 자연어가 아닌 Vision쪽을 다루는 사람들이라 그렇다.
+
+
+
+그래서  VQA를 풀기위한 다양한 방법들을 살펴보자.
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1. 첫번째 논문
+[Image Question Answering using Convolutional Neural Network with Dynamic Parameter Prediction]
+
+15년도부터 나온 이야기들.
+이미지가 있고 문장이 있다고 해보자. 
+이때 문장들에서 feature를 뽑는 방법은 LSTM에 집어 넣어서 LSTM의 마지막 cell state와 단어들에 대한 sequence가 들어갔을 때, 
+또 그 단어들의 sequence가 끝났을 때 마지막에 해당하는 cell state를 질문에 해당하는 feature로 사용한다. 
+그리고 이미지가 있으면 CNN feature를 뽑는게 일반적인 방법이다.
+여러가지 변형들이 있다. (16:55)
+
+
+여기서 VQA를 풀기 위해서 제안하는 것은 DPPnet임. (Attention based method)
+(Dynamic Parameter Prediction Network) 
+
+이것의 직관은 우리가 이미지가 주어졌을 때 그 이미지를 분류하고 싶은 네트워크를
+어떻게 만드냐면, 질문에 dependent하게 만들면 된다. 이는 매우 당연한 생각.
+
+
+DPPnet이 어디서 Motivation을 받았는지를 알아보자.
+computer vision 문제를 풀 때는 보통 Imagenet에서 pre-trained 된 네트워크를 가져온다.
+imagenet 1000개의 label를 학습한 weight를 가지고 와서(fine tuning을 시키고) 뒷단(fc층)만 갈아끼운다.
+
+VQA는 질문에 의해 결정되는 일을 하기때문에 질문에 dependent하게 마지막 layer를 만들어 보자는 의도. 
+그래서 main idea는 Parameter Prediction Network (질문에 의존)를 구성해서,
+마지막 layer에 Dynamic Parameter Layer라고 불리는 층을 삽입한다. 
+(마지막 layer에 parameter, weight들을 예측하는 알고리즘을 만들어보자.)
+
+그래서 질문에서 feature를 뽑고, feature를 통해 regression을 돌려 parameter를 만들자 임.
+
+한가지 고려할 내용은, 문장들은 단어기준으로 봤을 때 전부 길이를 다르게 가지고 있다.
+그래서 일반적으로 자연어처리를 할 때 유명한 Bag of Words(BoW)가 있다.
+BoW은 가진 단어들을 파악하여 one-hot vector로 만든 뒤 있다 없다를 파악함.
+빈도는 고려하지 않음.
+
+놀라운건, sentimental analysis나, 문서분류를 할 때 BoW가 굉장히 잘 된다고 함.
+이걸 좀 더 continous하게 바꾼게 CBoW (continous BoW)
+
+물론 CNN으로 할 수 있음.
+하나의 문장의 단어들을 one-hot vector로 만들어서 쌓고(행렬로 만듦.),
+혹은 word embedding을 통해 쌓고 이걸 CNN을 통과해서 feature를 뽑는 행위를 할 수 있음.
+이것도 상당히 잘된다고 한다.
+
+그다음에 RNN이 등장한다.
+앞의 두 방법들은 단어들의 sequence에 대한 흐름을 고려할 수가 없음.
+그래서 RNN에 집어 넣고, cell state를 업데이트 시킴.
+그리고 마지막 cell state를 feature로 사용하여 결과를 도출함. 
+우리는 보통 RNN을 다룰때 LSTM을 사용함.(Long -Short Term Memory)
+이 논문에서는 GRU를 사용했음.
+
+그렇게 해서 (RNN이든 CNN이든) 만들어진 마지막에 해당하는 feature vector를 질문에 해당하는 feature vector로써 사용한다.
+그 다음에 feature를 통해 regression을 통해 parameter를 뽑는다.
+
+근데 문제가 하나 있다. (21:55)
+그렇게 질문과 관련된 feature를 뽑으면, fc layer의  node결과를 뽑는데 필요한 parameter의 수가 엄청나다.
+ 
+Dynamic Parameter Layer(그림의 초록색 층)에 필요한 모수를 계산하려면
+N = Q x P 임.  이때 Q는 output layer nodes, P는 이미지 feature layer nodes 이다.
+그리고, N이라는 층을 구하기 위해서는 Question Feature층과 연동해서 
+fc layer를 필요하게 되는데, 이때 fc층의 모수 개수를 구하려고 한다면 (=R)
+R = QxPxM임. 이때, M은 Question feature layer nodes.
+
+즉, Q = 1000(정답) , P = 1000 (이미지 feature), M = 500 (Question vector)
+라면, 5억개의 모수가 필요함.
+근데 이게 VGG19 (1.44억개) 이 parameter의 개수보다도 많음.
+더불어, 한개의 층에 1.86GB의 메모리가 필요. 
+
+그래서 해결방법으로 N = P x Q 였던걸 N < P x Q를 고려함. (22:30) 
+예를들면 내가 숫자 10개로 100개의 parameter를 만들어 보겠다 임.
+일반적으로는 말이 안되지만, Hashing Trick을 사용하여 해결. (22:35)
+
+Hashing Trick이란 것은, 우리가 어떤 network를 정의하는데 보다 적은 수의 parameter
+를 가지고 parameter가 많이 필요한 상황을 cover하는 트릭이다.
+
+예를들면, fc층이 각각 4개의 node들을 가지고 있다면, 4x4 행렬이 나와야 한다.
+이때, 3개의 값만 가지고 4x4 모수행렬을 대체해 버리는 방법이 Hashing Trick임.
+그래서 당연히 3개의 값들이 4x4 행렬에서 반복적으로 사용함.
+
+이렇게 해도 성능차이는 그다지 나지 않는다. 이런 Hashing Trick이 잘되는 것을 2015년에 보인 바가 있으며, 
+DPPnet에서는 이를 가지고 parameter를 만듦.
+
+그래서 이 논문에서는 Dynamic Parameter Layer에서 1000 x 1000 행렬을 정의할 때,
+1000개의 parameter만 사용해서 행렬을 정의하게 된다. 
+물론, 처음에 학습시킬 때 1000개의 위치가 어디에 공통되게 들어갈지는 미리 정해 놓는다.
+
+
+
+성능의 개선은 (24:25) 에서 확인.
+그랬더니 괜찮게 나온다.
+(25:03) 을 보면, 항상 딥러닝이 그렇듯 매우 아쉽게 틀렸다. 보는 각도에 따라
+충분히 그렇게 답할수 있는 상황이 있음.
+코드도 있다.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2. 두번째 논문.
+[Multimodal Compact Bilinear Pooling for VQA]
+
+얘는 VQA를 위한 알고리즘은 아니다. 
+다양한 mode들이 있을 때 이를 잘 섞어서 적용을 하는 방법에 대해 이야기 하는 논문이고,
+얘를 VQA에 적용시켜봤을 뿐이다.
+
+VQA는 다시한번 얘기하지만, 질문이 나왔을때 답에 대한 속성을 뽑는 알고리즘을 찾는게 목적임. 
+그리고 그게 가능하려면, Multimodal이 중요함. 왜냐면 이미지와 문장은 서로 다른 mode를 취함. 
+이 두개를 섞는게 되게 중요하게 된다.
+
+그래서 섞는다는 얘기를 해보자. (27:40)
+우리가 이미지에서 물체들이 있다는걸 알았고, 질문이 있다고 가정해보자.
+(축제가 열릴 것인가?)
+현재 사진에는 음식, plate, bowl 등이 있으면 feast가 있을것이다 라고 생각할 수 있음.
+그리고 이런 상호관계를 잘 modeling하는게 중요하다.
+
+
+
+그래서 이걸 하는 제일 쉬운 방법은 concatenate를 사용하여 CNN을 통과한 class와 LSTM을 통과한 단어 label을 붙여버린다. 
+그러나, 이렇게 되면 서로간의 상호작용을 무시하고 연결한 셈이다. (모든 element를 사용하는데 있어 깔끔하긴 하다.)
+물론 성능이 잘 나오진 않음.
+
+
+두번째 방법은 elmentwise multiplication을 할 수 있음.
+만약 두 벡터의 길이가 같다면, 두개를 하다마드 곱을 통해서 사용해버리면 두 데이터 사이에 교류가 있게 된다.
+문제는,
+'CNN의 첫번째 feature와 LSTM의 첫번째 feature, 두번째는 두번째 feature가 과연 상호작용을 잘하는 단어끼리 묶인 것인가?' 
+에 대한 의문이 남음.
+
+
+그래서 세번째 방법으로 (제일 무식한 방법으로) 외적을 한다.
+n짜리 벡터와 n짜리 벡터가 있다면 n x n의 행렬을 고려할 수 있게 됨. 모든 경우의 수의 상호작용을 고려할 수 있다.
+문제는, 앞에서 Hashing Trick을 쓰게된 이유와 마찬가지로 parameter가 터지는 상황이 일어난다. 
+즉, 사용할 수 없다.
+
+
+그래서 이를 보완한 네번째 방법으로 2천짜리와 2천짜리 외적을 한뒤 차원을 줄여서 2천 dimension을 만들어 볼까 라는 생각을 함. 
+다시말해, 굉장히 큰 400만짜리 행렬을 그대로 사용하는 것이 아니라, 
+좀더 낮은 차원으로 mapping 시켜서 분석을 해보자 라는 방법을 생각함.
+이런 일련의 과정을 Multimodal Compact Bilinear pooling(MCB)이라 말함. 
+
+2013 Pham&Pagh논문에서, 우리가 두 어떤 벡터사이의 외적을 하고, 그 외적된 것을  Count Sketch(특정 연산임.) 로 보낸 것이, 
+각각의 벡터를 Count Sketch라는 연산을 하고 얻어지는 두 벡터 사이의 convolution과 동일하다 라는걸 밝힘.
+
+그리고 이 convolution은 (sigma processing(?) 을 배운 사람은 알겠지만),
+어떤 두 벡터의 convolution은 각각 두 벡터를 fre-transfer(?)을 통해 주파수면으로 보내고, 
+거기서 곱해서 얻어지는 것을 inverse fre-transfer로 가져오는 것과 똑같다.
+(Reproducing Kernel Hilbert Space 와는 사뭇 다름.)
+
+
+예를 들어보자.
+Count Sketch Operation은 벡터를 다른벡터로 옮겨주는 연산 (31:30)
+v = [1,5,2,3,2] // 내가 가진 벡터
+s = [1,1,-1,1,-1] h= [1,3,2,3,2] (d=3) // s와 h벡터는 random으로 한번만 초기화 한다.
+s벡터는 부호벡터, h는 갔다놓을 위치를 정의함.
+
+이때 최종적인 random sketch 는 다음과 같이 진행된다.
+y= [1, -2-2 , 5+3] = [1,-4,8]
+
+이를 논문에서 적용한 방법은 (33:10)을 참고한다.
+부호도 랜덤으로 바꾸고, 보낼 위치도 랜덤으로 놓는다. 이게 Multimodal Compact Bilinear pooling(MCB)임.
+
+그리고 나서 이 논문에서 Attention구조를 추가적으로 넣는다.
+Attention구조란 내가 무언가를 쓸 때, 
+그 이미지 혹은 그 문장에서 어떤 부분을 더욱 집중해서 (많이) 보겠다는 내용을 담고있음. 
+이에 따라 이미지에서도 초점을 좀 더 주게 된다.
+Attention을 사용하면 더 성능이 올라가게 된다 임.
+
+Attention에 대해 알아보자.
+결국은 이미지와 질문이 하나씩 주어지는데, 그걸 벡터로 볼거임. (34:56)
+이부분은 영상의 그림을 보고 이해하도록 하자.
+
+매우 효과적인 방법임. 결과가 뛰어남을 영상의 마지막 부분에서 설명한다.
+Attention은 영상을 보고 제대로 정리하기.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+위에서 살펴본 두개의 알고리즘은 전부 어떻게 해야 이미지와 질문을 잘 섞을 수 있을까에 대한 이야기이다. 
+그래서 MCB를 다뤄본 이유는 VQA에서만 사용이 되는 것이 아닌, 
+Multimodal을 해결하는데 있어서 굉장히 적합하기 때문이다.
+
+만약 우리가 다루는 데이터가 단순히 VQA가 아니더라도 여러 multimodal한 방법을 섞는게 중요한데, 
+이를 단순히 섞기엔 너무나 많은 parameter가 생기는 등의 장애 요소가 따르므로, 
+이를 해결하기 위해 MCB를 도입하는 생각을 알아보았다.
+
+나아가 Attention이라는 방법을 통해 좀 더 효과적으로 성능을 올리는것까지 할 수 있기에, 위의 내용들을 다뤄보았다.
+
+
+

@@ -1,0 +1,141 @@
+이번 단원에서는
+기본적인 RNN에 대해 알아보고,
+sequence generation, 좀 더 정확히는 Handwriting generation에 대해 알아보도록 하자.
+
+
+
+Handwriting generation 논문은 아래와 같다. 저자는 Alex Graves이다.
+[Generating Sequences With Recurrent Neural Networks]
+굉장히 배울점이 많은 논문이다.
+
+(01:30) 에 보이는 글씨는, 사람이 쓴 것이 아니라, 
+기계가 만들어서 직접 화면에 투영시킨것.
+Alex Graves 홈페이지에 가보면 내가 쓴 글자를 기계가 쓴것으로 나타내어 보여주는 알고리즘이 제공되어 있음.
+Alex Graves는 위 논문의 저자.
+
+
+이번 강의에서 다룰 내용은 아래와 같다.
+1. Structures of Recurrent Neural Networks (RNNs)
+2. Back Propagation through Time
+3. Generating Sequences froms RNNs
+4. Experimental Results
+5. Conclusion
+
+
+
+1. Structures of Recurrent Neural Networks (RNNs)
+
+우리가 일반적으로 봐온 네트워크는 FNN(feed forward NN 이다.)
+RNN이라 부르는 구조는, 
+이와 달리, 간단하게 입력이 있고 그 입력이 메모리에 저장되었다가 다시 불러들어 계산하는것.
+
+DRNN이란, RNN의 값을 전달해주는 과정에서, 중간중간에 층을 더 쌓는것. (03:37)
+stacked RNN과 구별된다. 
+기본 RNN에서 전체적인 구조가 달라지지는 않는다.
+
+stacked RNN은 hidden layer를 더 깊게 쌓는것. 
+박유성 교수님 자료를 기준으로 outer layer를 깊게 쌓는것을 의미한다.
+두개의 층을 hidden layer로 쌓을 때, 아래층이 short term 의 영역을 잡는다는 것으로 알려져 있고, 
+윗층이 long term의 영역을 잡아주는 것으로 알려져 있다.
+
+그래서 우리가 일반적으로 더 깊은 stack을 쌓을수록, 
+더 긴 dependency를 잡을걸 기대하면서 이러한 구조를 사용하게 된다.
+
+
+2. Back Propagation through Time
+
+Training에 대해 알아보자.
+
+우리가 NN을 학습시킨다는 것은 X_t-1 , X_t , X_t+1 에 , Y_t-1 , Y_t , Y_t+1 이 전부 주어져 있다는 뜻. 
+즉, X들의 sequence + y 값이 우리의 training data가 된다.
+
+그러면 마치 X를 잔뜩(시간배열순으로) 주고, y를 잔뜩 주고(시간배열 순으로)
+만든 구조로, (06:10) 단순히 입력에서 output으로 가는 구조를 만드는 셈에 불과하다.
+
+대신에 중요한점은, 각각의 weight들이 하나의 구조에 동일하게 사용됨. 
+(hidden층으로 들어올때와 나갈때의 모수)
+즉, 마치 shared 된 굉장히 큰 network로 볼 수 있는거임.
+이런걸 어려운 말로 Back Propagation Through Time, Unfolding in Time이라고 부른다.
+
+근데 우리가 나중 시간의 hidden층의 unit을 구하기 위해서는, 앞의 network를 
+통과해서 누적되어 계산이 되게 된다. (07:30)
+동일한 네트워크가 굉장히 여러번 반복되게 된다.
+
+이때, 동일한 parameter가 여려번 반복되어 곱해지게 된다. 
+즉, Vanishing / Exploding Gradient가 생기게 됨.
+
+그래서 Vanilla RNN은 Long Term Dependency를 잡기 굉장히 어렵고, 학습시키기도 굉장히 어렵다. 
+
+그래서 시간순으로 풀어내려가는걸 Unfolding in Time 이라고 부른다. 
+즉, 시간순으로 쭉 내려놓고 Feed forward NN처럼 구성한 뒤, 학습을 시켜버린다.
+그게 기계가 학습을 시키는 방법임.
+
+추가로 Gated Recurrent Unit(GRU)에 대해 알아보자.(09:22)
+LSTM에 비해 게이트가 하나 빠져있다.
+LSTM은 Input, Forget, Output gate가 있었음.
+
+GRU는 Reset Gate, Dynamic Gate 두개만 있다.
+Gate가 하나가 빠졌기 때문에 네트워크를 구성하는 parameter 셋 하나가 없다.
+그래서 더 빨리 돌아간다.
+
+하는일은 비슷하다.
+
+Reset Gate : 이전의 cell state를 얼마나 업데이트 시킬지 (0~1값을 지님)
+Dynamic Gate : 현재 내가 가지고 있는 candidate를 얼마나 반영 시킬지를
+z와 (1-z)로 섞어주게 된다. (0~1값을 지님)
+
+
+
+
+이제 다음의 논문에서
+
+3. Generating Sequences froms RNNs
+4. Experimental Results
+5. Conclusion
+
+위의 3,4,5 내용들을 살펴보자.
+
+[Generating Sequences With Recurrent Neural Networks] - Alex Graves
+
+Image captioning 에서 우리가 language model을 얘기할 때, 
+어떤 단어와 cell state 가 주어지면, 다음번 단어에 대해 확률분포를 제공한다고 했다.
+여기서도 마찬가지이다.
+
+RNN에서 과거에 대한 기억의 역할은, 
+1) 미래를 예측하기 위해 필요하다.
+2) 실수에 둔감해지고, 더 긴 패턴들을 저장하고 생성할 수 있다. 
+이를 위해 여기선 LSTM을 사용한다. 
+
+여기서도 Stacked RNN을 사용함. (12:40) LSTM을 여러개 사용.
+재밌게도, 중간 단계층의 LSTM이 output에 연결되어 있다.
+즉 , skip connection 을 볼 수 있음.
+
+이런걸 Deep recurrent LSTM net이라고 부른다.
+training은 이전 '입력들'(시간에 대해 누적된 x들) 이 주어졌을 때, 
+output이자 다음번 입력에 대한 값을 찾는거임.
+
+prediction Network (13:30) - 이런게 있다고만 일단 알고있기.
+(어떤 입력이 주어졌을 때 다음번 입력에 대한 확률 분포를 찾는것.)
+아직 Generation단계는 아니다.
+
+Text prediction (16:16)
+
+Handwriting Prediction (16:33)
+
+Hadwriting Synthesis (19:51)
+
+Synsthesis Network (20:52)
+- attention 구조와 정확히 일치한다.
+
+Heuristics(25:10)
+
+
+
+
+나중에 기회가 되면 다시 한번 들어보기.. 아직은 수준이 높아서 이해가 잘 되지 않는다.
+
+
+[주어진 사진을 원하는 화풍으로 만드는 Neural Style] 역시 따로 필기는 하지 못했다.
+
+
+

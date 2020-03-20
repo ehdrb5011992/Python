@@ -1,0 +1,410 @@
+Image detection 방법론들에 대해 알아보자.
+
+Part1 - R-CNN 계열(RCNN,SPPnet,FastRCNN,FasterRCNN)
+Part2 - 속도가 빠른 계열들 (YOLO 등..) 
+을 살펴볼거임.
+17단원은 Part1에 대한내용이다.
+
+참고로, 아래에서 표현하는 feature 는 값 1개를 의미한다.
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1) R-CNN (Region - CNN)
+
+[Rich feature hierarchies for accurate object detection and semantic segmentation(2014)]
+
+딥러닝에 대한 detection의 시초가 된 논문.
+어떤 분야의 시초가 된 논문은 말할 필요 없이 중요하다.
+그 자체로 의의가 있기에 살펴본다.
+
+일반적으로 CNN이 잘 되는 이유를 featrue를 뽑는 목적이기 때문에 그렇다.
+이 논문도 마찬가지.
+이미지 안에서 feature를 CNN으로 뽑아냄. 
+다만 , detection 문제가 sementic segmentation 과 차별되게 이 논문에서 어려운 점이 무엇이냐면, 
+물체에 대해 네모(bounding box)를 쳐 줘야 함.
+
+이미지 안에서 네모를 찾는 다는 것은, 상대적으로 쉽지가 않다.
+예를들면, sementic segmentation은 training dataset 이 굉장히 직관적이다.
+이미지 자체인 input과 이미지안의 각 채널에 class로 분류된 output이 있으면,
+그렇게 만들어진 input과 output이 training data가 된다. 
+그래서 출력으로 가는 output을, weight를 찾으면 그게 sementic segmentation이고 이게 대표적인 end-to-end방법이었다.
+
+그러나 detection 목적은 이미지가 있고 이미지 안에 있는 class에 네모를 치는것.
+결국 이미지 안에서 네모를 만들어내야 하는데, 직관적으로 쉽지는 않다. (end to end로 학습하기가 참 어렵다.)
+
+그래서 나중에야 네모를 효과적으로 만드는 방법에 대해 연구가 되었지만,
+초창기의 논문(이 논문) 에서는 네모를 만드는 현재의 일반적인 방법을 쓰지 않는다.
+
+
+이 논문(R-CNN)에서 detection을 어떻게 해결했는지 알아보자.
+
+먼저 , 이미지 안에서 bounding box라고 불리는 네모를 마구마구 뽑아낸다. 
+이때 네모는 딥러닝과는 전혀 관련 없는 방법으로 training data에서 뽑아낸다.
+그럼 우리가 이미지 안에서 네모를 뽑았다면, 
+원하는 size로 resize를 할 수 있다.
+
+그렇게 만들고 나면 CNN을 적용할 수 있고 pre-trained CNN을 이용하여 feature를 뽑고, 그 feature를 가지고 분류를 한다.
+
+여기서는 SVM(support vector machine)을 가지고 분류를 함.
+다시 말하지만, 딥러닝과 관계없는 이미지 박스를 잔뜩 뽑아냄. (약 2천개)
+그리고 2천개들을 각각 다 CNN에 집어넣고 분류를 함.
+
+그래서 분류를 하고싶은 물체가 20개다라고 한다면 분류의 class가 되는것은 21개가 되야함. 
+1개 분류에 해당하는 것은 쓸모없는 class로 할당하기 위함. (2천개의 bounding box중 쓸모없는 box들이 대부분)
+- 그 쓸모없는 class의 이름을 강의에서는 background라고 표현함. (고려하지 않는 class)
+이게 전부임
+
+
+
+
+R-CNN 은 총 3개의 요소로 되어있다.
+
+1. 딥러닝과 상관없는 training data와 상관없는 어떤 방법론(이 논문에서는 selective search를 사용)을 통해서
+Generating Category Independent Region Proposals (물체가 있을것 같은 공간에 네모치기) 
+를 진행한다.
+
+이것 때문에 시간이 굉장히 오래 걸린다. 한개 이미지를 처리하는데 1분 걸림.
+
+
+
+2. 네모를 쳤으면 그 네모를 가지고 CNN 모형을 통과시킨다.
+여기서 CNN도 내가 찾고싶은 내 목적에 맞게끔 학습을 다 완료한 CNN을 쓰는 것이 아니라 pre-trained CNN을 사용한다.
+imagenet처럼 미리 학습된 CNN을 가지고 입력 이미지가 들어오면 이미지의 feature 를 뽑는다.
+
+
+
+3. 그 뽑은 feature를 linear SVMs를 사용해서 classifier를 진행함.
+여기에서는 우리가 가지고 있는 classifier가 들어가게 된다.
+(softmax를 사용하면 성능이 더 떨어져서 SVM을 사용했다고 논문에서 밝힘.)
+이미지의 형태가 어떻게 생겼는지와 관계없이, (세로가 긴 직사각형이든, 가로가 긴 직사각형이든) 
+227x227로 바꿔버린다. (fixed size)
+
+
+RCNN 첫번째 요소에 해당하는 region proposal은 물론 여러가지 방법론들이 있다.
+여기서는 selective search라는 사용했으며, 당연히 region proposal의 성능에 따라 
+결과 값은 굉장히 달라진다 즉, 크게 dependent하다. 
+
+selective search 알고리즘은 segmentation 분야에 많이 쓰이는 알고리즘이다.
+보다 자세히는, 객체와 주변간의 색감, 질감차이, 다른 물체에 애워쌓여있는지 여부 등을 파악해서 
+다양한 전략으로 물체의 위치를 파악할 수 있도록 하는 알고리즘이다.
+
+그렇게 2천개의 네모를 랜덤하게 찾았다고 한들, 
+그 안에 내가 원하는 모양의 네모박스가 없으면 아무리 이후의 모형을 돌려봤자 classification이 되지 않는다.
+2천개의 네모를 찾고, 227x227로 resize된 이미지를 각각 CNN을 적용시키는 방법 때문에 작업시간이 오래걸림.
+
+이 논문에서는 feature extraction으로 AlexNet을 사용함.
+옛날 논문이기에 GoogLeNet과 ResNet이 없었음.
+
+마지막의 class 분류 층만 1000에서 21로 바꿔줌.
+
+
+
+다시한번 절차를 설명한다. (06:39)
+이미지가 있으면 다양한 size의 bounding box(직사각형이든 정사각형이든)을 2천개가량을 뽑고, 
+그 bounding box를 227x227로 resize를 진행한다.
+그리고 CNN에 집어넣고 4096의 feature를 뽑고 여기에 21개 분류의 SVM을 돌린다.
+
+GPU를 써도 한장에 13초, CPU를 써도 한장에 53초가 걸림.
+
+왜 이렇게 오래 걸릴까?
+
+CNN이 오래걸리는 건 알지만, 한장의 이미지를 처리하는데 이렇게 오래 걸리지 않는다. 
+다만, 여기서는 이미지는 한개지만 그 안에서 만들어지는 bounding box들 2천개 가량이 모두 CNN에 들어가야 한다. 
+그래서 CNN이 2천번 돌아야한다. 바로 여기서 bottleneck이 생긴다.
+
+문제는 training이 어렵다.
+test할때는 이미지에서 region을 resize하고 돌리면 되는데,
+학습시킬 때는 class에 해당하는 bounding box를 일일히 다 쳐야한다.
+즉, 정답을 이미 알고있는 bounding box에 근접하게끔 box를 학습시켜야 한다.
+
+
+네모를 뽑는건 아래의 절차를 통해서 좋은 네모가 잘 걸리지게 뽑는다.
+
+뽑는 네모가 실제 네모와 얼마나 겹치는지를 보는 것이다.
+완벽히 겹치면 좋겠지만, 확률적으로 나오지 않음.
+겹치는 영역, IoU(intersection of Union), 이 0.5보다 크면 얘를 내가 
+positive data라고 보는 것이다. 8:28 의 경우는, 파란색 박스를 dog라는 class로
+부여하게 된다. (빨간색 박스는 class박스 정답)
+
+빨간색 박스는 ground truth로 (GT) Detection 문제의 경우, 
+바운딩 박스 정보가 training 이미지 레이블 상에 포함되어 있다.
+
+
+
+*****************************************
+R-CNN은 2-stage Detector로서 
+전체 Task를 두 가지 단계로 나누어 진행한다.
+첫 번째 단계는 Region Proposal (물체의 위치를 찾는 일)
+두 번째 단계는 Region Classification (물체를 분류하는 일)
+*****************************************
+
+
+
+더불어 negative data는 IoU가 0.3 이하일때 이다. 
+그 사이에 있는 IoU값은 아예 사용하지 않음.
+-이 부분은 다소 불완전하다.  아래의 사이트를 참고삼아서 더 이해하도록 하자.
+(https://nuggy875.tistory.com/21)
+(https://nittaku.tistory.com/273)
+
+
+그다음에 bounding box regression이라는 것이 들어간다.
+우리가 이미지 안에서 네모를 뽑았는데, 그 뽑은 네모는 학습 데이터 안에서 있는 네모의 위치(정답)와 전혀 관련이 없다.
+왜냐면 딥러닝방법을 통해서 학습을 하는 것이 아닌, selective search라는 알고리즘을 통해 네모를 만들었기 때문에 그럼.
+더군다나, 네모를 랜덤으로 뽑았기에 확률적으로 처음부터 완벽히 겹칠 가능성은 0 이다. 
+
+그래서 내가 네모를 뽑았더라도,
+어떻게 움직여야지 실제 ground truth bounding box와 가까워 지게 만들 수 있을지에 대한 고민이 bounding box regression임.
+(한마디로 네모가 올바른 네모로 가게끔 만드는 요소)
+
+그래서 class를 찾는 것이 아닌 내가 뽑은 bounding box가 실제 bounding box와 유사해지는지를 찾는거임.
+이거는 모든 detection 방법에 다 들어가 있다.
+즉, 우리가 뽑은 bounding box들을 실제 bounding box에 가깝게 움직이기 위해서 
+R-CNN은 4개의 숫자들이 추가로 필요하다고 주장한다.
+
+원래는 실제 bounding box에 가깝도록 만드는 방법은 여러가지 방법이 있겠지만, 
+여기서는  중심점(x,y) ,너비(width), 높이(height) 를 추가적으로 학습시켜서 original bounding box에 가까워지도록 만든다.
+(학습이라는 단어가 맞나? 얘네들이 NN을 쓰는건 아닐텐데.... 한번 확인해보기)
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2) SPPnet
+Spatial Pyramid Pooling(SPP)임.
+
+딥러닝에서 처음 나온 말은 아님. computer vision쪽에서 처음 나온 말.
+
+SPP방법은
+하나의 이미지를 기본형, 기본형의 넓이를 반으로 줄인것(1/sqrt(2)), 1/4로 줄인 것, 
+1/8 줄인것 등... 들을 쭉 나열시켜서 그 정보를 한번에 고려한 어떤 분류기를 만들어버린다.
+
+이것의 장점은 애초에 분류기에 들어오는 class는 이미지 내에서 다양한 scale로 존재하기 때문에,
+이미지 scale에 조금 더 robust한 결과를 얻게 된다.
+
+SPPnet의 가장 큰 장점은 R-CNN의 가장 큰 단점을 보완했다는것임.
+R-CNN의 가장 큰 단점은 CNN이 돌아가는 횟수가 region proposal에서 나오는 bounding box의 갯수라는 점임.
+그래서 CNN이 2000번이 돌아가기 때문에, 한 이미지를 처리하는데 GPU 기준 13초나 걸렸음. 
+
+그러나, SPPnet은 CNN이 돌아가는 횟수가 오직 1번임.
+
+일반적으로 CNN은 고정된 image size를 요구함. fc층의 존재때문에 그렇다.
+이런 문제를 해결하기 위해 R-CNN은 여러 bounding box들을 뽑고 그걸 resize해서 이 문제를 해결했었다.
+SPPnet은 conv.을 1번 돌려서 얻어진 convolutional feature map위에서 sampling을 진행한다.
+
+좀 더 구체적으로 알아보자면 R-CNN에서와 같이,
+이미지 안에서 bounding box를 뽑는것은 selective search와 같은 region proposal로 진행한다. 
+즉, 딥러닝과 상관없이 진행단다. (crop/wrap)
+
+이때 R-CNN에서는 2천번의 CNN의 적용이 bounding box 생성 이후에 적용이 된 반면,
+SPPnet은 전체 이미지를 CNN에 1번 적용 시킨 뒤 최종적으로는 convolutional feature map을 얻는다. 
+그리고 convolutional feature map위에서 해당하는 영역에 있는 어떤 정보를 빼온다.
+
+그리고 그렇게 얻은 feature map에서 SPP를 진행. (물론 채널의 수는 유지)
+주의할 점은 기존에 사용한 bounding box resize (ex.50x200x256 -> 100x100x256) 대신,
+50x200x256를 가지고 SPP방법을 진행함.
+
+SPP의 목적은 fixed-length representation을 찾는것. 
+(마치 fc층의 노드갯수가 정해져 있다고 생각하면 쉬움.) (15:08)
+다시말해 sampling된 bounding box input size에 상관 없이 fixed-length representation에서 
+동일한 vector size를 얻고 싶은것임. 
+당연히 그래야 fc층에 들어가서 연산을 이어서 할 수 있게 됨.
+
+
+
+절차는 아래와 같음.
+1. feature map에서 bounding box를 sampling함. 
+(이때 bounding box는 이미지에서의 위치를 기준으로 bounding box를 진행)
+
+2. SPP진행
+bounding box의 input size가 2x5 라고 했고,  2x2 / 1x1 의 pooling을 거친다고 하자. (그려보면서 이해해보자)
+1) 1x1 -> global average pooling을 거침. (1개의 값을 얻음)
+2) 2x2 -> 2 / 3 / 2 / 3 의 각각 average pooling을 함. (4개의 값을 얻음)
+-> 총 5개의 숫자를 표현함.
+
+이렇게 내가 뽑은 bounding box의 input size에 관계 없이 늘 고정된 길이의 벡터
+를 뽑을 수 있음. 이를 spatial pyramid pooling(SPP)라고 말함. 
+- fixed-length representation- 를 찾는게 목적.
+
+물론, 1x1 / 2x2 / 4x4 / ... 등 더 많아질 수 있음.
+이게 전부다.
+
+
+R-CNN보다 더 성능이 좋은걸 확인할 수 있음.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3) Fast R-CNN (18:13부터 보기)
+
+이름에서 부터 알 수 있음. 더 빠르게 만듦.
+
+R-CNN -> SPPnet -> Fast R-CNN (18:35)
+
+SPPnet과 Fast R-CNN은 거의 구조가 같음.
+다만, fixed-length representation을 찾을 때, SPPnet은 SPP를 이용해서 찾았다면,
+Fast R-CNN은 RoI(roi) pooling을 통해 해결한다.
+다만, 그 두개가 근본적으로 거의 같음.
+
+Fast RCNN은
+1. Better performance
+2. single stage training
+3. All nets are trained
+이다.
+
+과정을 요약하면 다음과 같다 :
+이미지가 있으면 conv.를 한번 적용해서 conv feature map을 만든다.
+그리고 Roi projection이라는 것을 통해서 이미지에서 얻은 Roi 영역을 feature map 으로 crop해온다.
+
+당연히 region이 크기가 다르니까 서로 다른 size가 feature map에 새겨짐.
+그럼 얘를 roi pooling layer을 통해 Fixed size feature vector를 만든다. (마치 SPPnet에서 했던 것처럼)
+그렇게 들어온걸 두가지 갈림길로 사용한다. (classifier + bounding box regression)
+즉, output은 두가지 정보를 가짐. (1. k+1 class labels    2. bounding box location)
+
+loss function = classification loss +  bounding box regression loss 임.
+
+다시 말하지만, SPPnet과 Fast R-CNN은 거의 똑같음
+오로지 SPP를 사용했냐, RoI Pooling을 사용했냐 차이 뿐임.
+근데 RoI는 너무나도 간단한 방법론이기 때문에 성능개선이 그다지 이루어지지 않음.
+
+RoI 풀링은 미리 정해준 사이즈로 각 영역에서 평균내는것임.
+ex) RoI 풀링은 3x3 영역으로 미리 정해놓고, 9개를 가지고 fixed-length representation를 만듦.
+
+즉, SPP의 특별한 케이스임. SPP가 좀 더 general한 이야기
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4) Faster R-CNN
+
+여기서 부터 딥러닝을 이용한 region proposal이 들어간다.
+
+원래는 딥러닝을 이용하지 않고 bounding box를 뽑았다. 
+그랬기 때문에, bottleneck이 발생했음. box를 어떻게 뽑는지에 따라서 성능이 너무나도 좌우될 수 있기 때문임.
+
+그러나 여기서부턴 딥러닝적용.
+이렇게 됨으로써 속도가 빨라지면서 성능이 올라감.
+
+그리고 요즘 트랜드인 SSD, YOLO 등이 나오게 됨.
+더불어, YOLO는 원래 Faster R-CNN과 거의 동시에 나옴. 
+즉, 서로 다른 두사람이 거의 동시에 비슷한 아이디어를 낸거임.
+
+더불어 YOLO v2는 SSD의 장점을 더해 쓴 것으로, 이쪽들 모형들은 서로의 장점
+들을 계속적으로 고려해서 만들어 나오는 중.
+
+
+
+이제 좀더 Faster R-CNN에 대해 알아보자. (24:52)
+
+1. pyramids of images (이미지의 사이즈를 바꾸는것)
+2. pyramids of filters (필터들의 사이즈를 바꿔 가는것)
+(2.와 비슷한 개념을 sementic segmentation에서 Atrous conv. 에서 봤음.)
+3. pyramids of anchors
+여기서 anchors란, 미리 정해져 있는 bounding box 크기를 이야기 한다.
+우리가 대충 가정하면서 bounding box 크기를 정하는거임.
+
+그래서 이 bounding box를 조금씩 바꿔가면서 우리가 원하는 bounding box를 조절해 나아가는게 3. pyramids of anchors 이다.
+
+논문에서는 하나의 위치(픽셀)마다 9개의 anchors를 만든다.
+3개의 서로다른 size, 3개의 서로다른 가로,세로 비를 가지고 9개 종류를 만듦.
+
+
+(26:42) 를 보면 Faster R-CNN에 대해 나와 있다. 
+빨간색 부분이 region proposal network 에 해당하는 새로운 부분임.
+region proposal network가 해주는 역할은 이미지를 입력으로 받아서, 
+혹은 convolutional feature map을 입력으로 받아서 bounding box만 뱉어준다.
+그냥 어디에 있을 것 같다는 bounding box만 뱉어준다.
+
+region proposal network를 어떻게 사용하냐면, 하나의 이미지가 들어왔을 때 CNN을 돌린다고 생각해보자. 
+CNN을 돌리고 나면 어떤 conv. feature map이 나온다. 
+그게 32x32x512가 나왔다고 해보자. (100x100x3을 집어넣고)
+그러면, 1024(=32x32)개의 pixel 이 있는거임. 
+그리고 그 32x32 각 픽셀마다 어떤 anchor들을 정의를 한다. 
+총 K(논문에서는 9)개의 anchor 박스를 정의한뒤 어떤게 쓸모 있는지를 찾고, 
+추가적으로 어디로 anchor박스를 옮겨야지 진짜 box가 나오는 지를 학습 하는 것임.
+
+결론을 말하면 region proposal network은 32x32x512 feature map을 받아서 32x32x54 의 형태가 나왓다면, 
+그 중간 매개체 역할이 region proposal network임. 
+(54의 숫자가 무슨의미인지는 아래에 있다.)
+
+
+
+정리하자면,
+관심있는 픽셀을 기준으로(각 픽셀마다) size는 총 3가지 , 종횡비 3가지 -> 9가지의 bounding box를 만듦. 
+즉, {128x128 , 256x256, 512x512} x {1:1, 1:2, 2:1} = 9 가지
+
+우리는 1024개의 pixel에 대해 고려하고, 각 픽셀에 대해 9개의 bounding box를 뱉을 것임. 
+즉, 9천개의 bounding box를 고려중임.
+
+그리고 사실 여기서는 큰 의미는 없음. 모든 격자점들마다 9천개의 parameter가 있기 때문. 
+(?? 초기 네모 사이즈가 feature map 사이즈인 32 대비로 커서 다 덮는다는 소리인가...? (29:43))
+
+
+
+그리고 아래의 2k, 4k개의 모수들을 고려해보자.
+
+A. 2k scores
+
+우리가 진짜 원하는건 그 위치에서 bounding box에서 있을만한 가장 그럴싸한 bounding box를 뽑아야 한다. 
+그러기 위해선 어느 bounding box가 쓸만한지 측도(score)를 정의해야함.
+
+당연히 그 score는 각 anchor마다 붙어있음.
+픽셀당 각 anchor(9개)는 2개의 숫자를 가지고 있음. 앞의 숫자가 크면 positive,
+뒷 숫자가 크면 negative를 할당하게 된다. (좋다 안좋다)
+(즉, bounding box의 쓸모성을 말하는 측도)
+
+
+B. 4k coordinates
+
+bounding box는 미리 정해놓은 size임. 
+첫번째 k개(여기서 9)의 bounding box는 초기값에 불과함. 3x3개의 조합임.
+그리고 이 각 초기 box에서 4개의 추가적인 모수들이 필요하게 된다.
+이전에 R-CNN에서 언급했던, 중심(x,y) 와 width, height 가 이에 해당.
+그래서 bounding box를 조절하게 됨.
+
+=> 6k개의 모수가 필요함.
+
+즉 여기서는 9 x (4+2) = 54개 채널을 지닌 fully convolutional network을 만드는것임!! (31:28)
+뭐 대략 3x3 필터를 사용하고, 54개가 있으면 된다. 
+즉, 한 픽셀의 깊이로 54개의 정보들을 내포하게 되고 이 깊이 값들은 박스의 정보이다.
+그걸 잘 정리해보면 k개의 anchor box가 모든 gird point들에 대해 나오게 됨.
+
+이게 deep architecture에 해당함.  k x (4+2) depth의 FCN 을 만들게 되는데,
+4번은 위치조절 2번은 박스 평가로 channel에 의미를 부여하게 되었다.
+매우 인상깊은 부분.
+
+밖에서 봤을 때는 CNN인데, 각각에 의미가 있음.
+
+굉장히 큰 물체와 작은물체를 다 잘 잡으므로써 훨씬 더 잘된다. (33:50)
+즉, pyramids of anchors 가 큰 효과를 지녔음을 다시한번 확인.
+(34:53)에서는 매우 작은 시계도 잡아버린다.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+정리
+
+RCNN : Too slow for multiple convolution
+SPPnet : Not accurate + multi stage training
+Fast RCNN : Bounding box sampling is still slow
+Faster RCNn : Sample boundling box with CNN (bounding box 자체를 NN을 이용해서 처리)
+
+즉,
+
+Faster RCNN = Region proposal Net + Fast RCNN.
+다시말해 Faster RCNN을 이해하기 위해선 Region propsal network를 이해해야 함.
+
+
+또한 총정리 (35:02)
+
+RCNN은 이미지가 들어가면 selective search를 통해 regions들을 뽑고, 각각 resize를 진행한다. 
+그리고 각각 CNN적용 후 convolutional feature map을 뽑고 SVM 적용후 분류를 한다.
+
+SPPnet은 이미지가 들어오면 convolutional feature map을 한번 뽑고,
+뽑힌 convolunal feature map에서 해당하는 region을 (이미지에서 뽑은) 잘라와서 SPP를 적용 시키고 classification을 진행
+
+Fast R-CNN 은 SPPnet과 비슷
+
+
+Faster R-CNN은
+
+image가 들어가면 fully convolutional features를 만든다., 
+그리고 bounding box classification과 bounding box regression을 진행하고, 
+이렇게 뽑힌게 Fast R-CNN 에 들어가게 된다. 
+즉, Region proposal Net -> Fast RCNN 적용.
+
+영상 혹은 ppt 참고.
+가장 기본이 되는 총 4개의 detection 방법들에 대해 알아봤다.
+

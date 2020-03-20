@@ -1,0 +1,292 @@
+detection 방법론들을 추가적으로 알아보자.
+
+R-CNN계열과 다른 살짝 다른 방법론들이며,
+YOLO, YOLO2 , SSD는 중요하기때문에 꼭 알아놓자.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1) AttentionNet
+[AttentionNet- Aggregating Weak Directions for Accurate Object Detection(2015)]
+
+카이스트 권인소 교수님 연구실에서 쓴 논문. (로보틱스, 컴퓨터비젼 연구실)
+이 논문이 가지는 main contribution 은 우리까지 지금까지 가져온 detection문제를 다르게 접근한다.
+
+지금까지 detection은 bounding box(이하 네모)를 사용했는데,
+좀 더 구체적으로 AttentionNet에서는 네모의 크기를 바꾼다.
+
+우리가 물체를 찾는 것을 어떤 네모 크기를 순차적으로 바꿔서, 
+바뀐 네모 크기가 이미지에 있는 물체와 만나게 되도록 하는게 AttentionNet
+
+당연히, 이미지 안에 물체가 한개 있다고 가정해야함.
+(single object detection 문제)
+
+
+
+Contribution
+1. Proposed a novel detection method, which estimates an exact bounding box by aggregating weak predictions.
+이전에는 우리가 네모를 region proposal network을 통해 뽑든지, 
+아니면 네모를 selective search를 이용하여 sampling으로 뽑든지,
+그 모든게 다 얻어지기 때문에 굉장히 정확한 네모를 얻기가 쉽지 않았었음.
+
+2. Does not seperate object proposal, classifier, post bounding box regression.
+
+3. State of the art on single class object detection tasks
+
+논문의 scheme임. (03:42)
+이미지를 227x227x3으로 resize함. 이후 AttentionNet을 거치고, 5 + 5 개의 값을 얻음. 
+
+왼쪽 5개값은 이미지의 왼쪽 위의 점(구석)에서 출발하여 box를 줄여나감.
+오른쪽 5개의 값은 이미지 오른쪽 아래 점(구석)에서 출발하여 box를 줄여나감.
+즉, 두개의 controler가 있음. (둘 다 중심방향을 향해 크기가 줄어듦)
+
+두개의 값이 둘다 T로 예측하면 네모로 최종 출력.
+두개의 값이 둘다 F로 예측하면, 기각.
+둘중 하나의 값이 F이면 박스를 줄여나감.
+이 때 줄어든 이미지를 다시 resize해서 다시 attentionnet에 집어넣는다.'
+얘를 계속 반복. 그러고 나면 좋은 성능이 나온다.
+
+
+
+training phase
+매우 간단하다.
+train 데이터는 실제 bounding box가 어디에 있는지를 알고 있기 때문에 
+임의의 네모를 치고, 실제 네모와 가까운지를 구할 수 있다.
+
+바꿔말해서 이미지 안에 네모가 있으면, 임의의 네모를 셈플링 하므로써 
+무한히 데이터를 만들 수 있다.
+그리고 네모를 어떻게 움직여야 실제 네모에 가까워질 수 있을 지를 계속 얻게 된다.
+
+그리고 target이 여러개가 있다면, IOU가 가장 큰 것만 노린다.
+더불어, initial crop은 랜덤하게 만든다.
+
+물론, 여러 종횡비를 가지고도 실험을 많이 한다.
+내가 가진 training data의 네모와 다른 종횡비를 가지고 있으면 잘 안될수도 있기 때문에 그렇다.
+
+만약 이미지 안에 여러개의 object가 있으면 object들을 image detection을 해서 값을 네모들의 초기값을 얻는다. 
+그리고 초기값들을 merge한다음에 크기를 2.5배 키움으로써 re-initialize를 한다. 
+그리고 다시 detection을 시킨뒤, 최종적인 merge를 진행하여 bounding box output을 내놓는다.
+
+이렇게 복잡하게 하는 이유는, 애초에 이 알고리즘은 한개의 object를 대상으로 만들어 진 것인데, 
+여러개의 object를 대상으로 진행하다 보니 복잡하게 되었음.
+
+
+원래 이 방법론은 대회에서 1등하기 위해 만들어진 것은 아님.
+이 방법론은 어떤 하나의 물체를 찾고 싶을 때 정확히 어디에 있는지에 대한걸 고민하다가 만들어짐.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2) YOLO
+[You Only Look Once- Unified, Real-Time Object Detection(2016)]
+
+새로운 흐름이다. CVPR(Computer Vision and Pattern Recoginition) 16년도에 올라옴.
+기존의 R-CNN이 나오고나서 막 이 논문이 나왔는데,
+그때 문제점은 여러번의 네모들을 가지고 다시 CNN에 들어가는거였음.
+
+Faster R-CNN만 봐도 region proposal network로 딥러닝을 통해 region들을 학습시키지만, 
+어찌됫든 각각의 region들이 NN에 들어가는건 변함이 없다.
+
+
+여기서는 그런절차들이 없다. (bounding box regression들도 없음.)
+
+이미지 하나가 네트워크에 들어가면, 딱 detection된 bounding box가 툭 튀어나옴.
+end to end와 같이. 그래서 굉장히 빠르다. (11:12) 를 봐보기.
+거의 real time으로 잡음. (성능은 Fast R-CNN과 비슷)
+
+
+
+어떻게 했을까?
+기존에는 네모가 NN에 들어가면 그 네모가 무엇인지 분류를 해결했는데,
+이것은 네모가 어딨는지와 동시에 네모가 어떤 class를 지니고 있는지를 동시에 찾는다.
+
+그래서 detection 문제를 일종의 classification + regression문제로, 
+즉 네모가 어떤 class인지 + 위치가 어디에 있는지 에 대한 문제로 바꿔버림.
+
+이미지가 들어가면 S x S gird로 줄인다. (여기서는 7x7까지 줄임.)
+그러면 , 49개의 grid마다 class probability를 1개씩 부여하고 bounding box를 2개씩 부여한다.
+논문에서는 B개라고 표현하지만, 2개임.
+결국에는 CNN을 통해서 걸러져 나온 7x7짜리 feature map을 가지고,
+7x7x(B*5+C)를 갖는 문제로 바꿔버린다. - C는 class 개수 (class확률이 들어갈 텀)
+
+마치, region proposal NN에서는 채널정보가 class에 독립인 region들에 대한 네모가 살고 있었는데, 
+이와 마찬가지이다. 
+(YOLO에서는 region정보 + class정보임)
+
+5를 곱하는 이유는 중심점(x,y), width, height, conf // 5개의 모수이며,
+이때 conf는 그 bounding box를 쓸지 안쓸지에 대한 칸이다.
+(confidence 정보까지 뽑는다.)
+
+논문에서는 2개의 boudning box를 뽑으므로, B=2인 상황
+논문에서는 20개의 class에 대해 구별하므로, C=20인 상황
+
+전체적인 NN 구조에 대한 그림은 (15:53)
+
+448x448 -> 7x7x1024까지 줄임 -> 4096 node fc층을 섞음. ->  7x7x30 이됨.
+
+앞의 NN의 구조는 parameter를 줄이기 위해 inception구조처럼 만듦.
+그리고 왜 그런지를 모르겠는데,  fc층을 섞음.
+30이 depth가 되는 이유는, (2x5 + 20) 임.
+
+YOLO predicts multiple boudning boxes per grid cell
+
+또한 loss의 구성은 
+중심점에 대한 loss + width/height의 loss + confidence loss + class 확률 loss
+로 구성되어있음. 전부 제곱오차 
+
+
+YOLO의 한계는 뭘까?
+1. 2개의 네모만 만들기 때문에, 이미지 안에 작은 object가 서로 붙어 있는 경우 적합하지가 않다.
+2. 네모 정보가 정확하지 않을 수 있음.
+3. 조그만 네모와 큰 네모를 동일하게 보니까, 점수를 매길때 썩 훌륭하지는 않다.
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+3) SSD
+[SSD: Single Shot MultiBox Detector(2016)]
+
+Google에서도 코드를 공개해서 되게 쉽게 돌려볼 수 있음.
+YOLO의 컨셉과 Faster R-CNN의 region proposal Network 를 잘 합친것.
+
+이름에서 많은것이 들어있는데, single shot은 you only look once에 있는 concept.
+multibox는 미리 정해놓은 anchor들(네모박스들)을 정했음.
+
+
+기존에 했던 방식은
+
+1) 어떤 네모가 어디에 있을 거다라는것을 가정함. (region proposal network를 하든 selective search를 하든 가정함.)
+2) 네모들을 가지고 feature를 뽑아서
+3) 분류 적용.
+
+그렇게 했을 때 만들어지는 Faster R-CNN이 빠르긴 하지만 
+(1초에 7장의 이미지 처리 - 7fps , mAP가 73.2%)
+(참고로 기존의 R-CNN은 13초에 1장의 이미지를 처리함.)
+
+또 YOLO는 45fps, mAP 가 63.4%이지만, 
+본인들이 주장하는 SSD모형은 59fps에 mAP가 74.3% 이라고 YOLO보다 좋다고 주장함.
+성능도 좋고 속도도 좋다.
+
+(여담) 재밌는건 이후 이에 대한 대응으로 YOLO저자들이 SSD를 benchmarking 하면서, 
+SSD보다 속도도 빠르고 성능도 좋은 모형(YOLOv2)을 소개함.
+
+
+
+SSD의 코어는
+
+-predicting 
+1. category scores (YOLO) 
+2. box offsets for a fixed set of default boxes 
+(Faster R-CNN의 region proposal network, anchors)
+
+- from each cell of multiple convolutional feature maps
+(each cell 에 해당하는게 YOLO 기법)
+(multiple에 해당하는게 deconvNet - sementic segementation에서 봤던 컨셉)
+
+되게 좋은 다양한 컨셉들을 잘 아우른 논문이다.
+
+결과적으로 각 feature map의 cell 마다  K개의 다른 네모를 가지고 
+각 cell마다 c개의 class score와 4개의 네모 offsets(변위자)를 
+
+(C+4)K 의 필터 개수를 지님.
+즉, 각각의 anchor박스마다 어디로 옮기면 좋고, 그게 실제로 어떤 class인지를 나타내는게 알고리즘.
+
+SSD와 YOLO의 차이는 (23:32) 입력이미지가 우선 다르다.
+YOLO - 448x448
+SSD - 300x300
+입력 이미지 size가 달라지면, 동일한 conv. net을 써도 속도가 빨라진다.
+그래서 300이라는 이상한 숫자는 결국 속도를 늘리기 위해서 size를 조정한 것 같음.
+그래서 SSD를 YOLO보다 빠르게 만들려고 애쓴것 같은 느낌이다.
+
+SSD와 YOLO의 가장 큰 차이는 바로 네모를 찾는 방법이다.
+YOLO - box의 위치를 직접 찾는다. (현재 주소를 뱉는데 중점)
+SSD - box의 offset을 찾는다. (즉, 변화량(델타값)을 뱉는데 중점)
+그래서 YOLOv2도 box의 offset을 찾는것으로 바꿔버림. 이게 더 성능이 잘나오기 때문.
+
+또 SSD는 multiple feature map을 사용한다. (24:34)
+어떤 이미지가 들어가면, 한개의 feature map만 사용하는것이 아니라, 다양하게 씀. 
+(서로다른 scale을 갖는 feature layer에서 뽑아서 사용)
+
+결과는 다양한 size들을 찾고 더 효율적으로 됨.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4) YOLOv2
+[YOLO9000: Better, Faster, Stronger]
+
+YOLO가 SSD를 보고 어떤 테크닉들을 사용했는지를 중점으로 보면 좋다.
+굉장히 실용적인 논문이고 배울점이 많은 논문.
+
+YOLO는 왜 덜 작동할까?
+1) localization error
+2) low recall compared region proposal based method <--- 이게 중요하다.
+
+precision & recall에 해당하는 그것. recall은 통계의 민감도.
+현재 가진것들을 가지고 예측했을 때 얼마나 맞추는지.
+
+즉, low recall은 얼마나 값을 자주 불러내는 지에 의존한다.
+box를 무한개 뽑아버리면 실제에 걸치는 box를 뽑을 수 밖에 없게 된다.
+
+그러나, YOLO는 7x7로 나누고 각각 2개씩 box를 뽑음. 즉 98개만 뽑음.
+R-CNN이 2천개를 뽑았다는 것을 상기할 때, 당연히 YOLO가 recall이 낮다.
+
+그래서 여러개의 해결법이 들어감.
+
+
+
+<better>
+1. Batch Normalization : 2% 성능 개선
+
+2. High Resolution : 224 size에서 448로 바꿨더니 성능개선
+
+3. Anchor Boxes (이게 중요하다)
+우리가 원래 output을 그냥 뽑았는데, 
+그게 아니라 bounding box의 size를 미리 정해놓고 그것의 offset를 찾는게 더 잘된다.
+
+4. Dimension Clusters 
+실제 train data에 있는 bounding box에 cluster를 하고, 
+거기에 많이 들어가있는 boudning box 크기를 가지고 anchor box의 pre-defined를 정함.
+
+5. Location Prediction
+기존 방법의 predicting location보다 YOLO9000는 scaling (x1.2 , x0.9 등..) 을 진행.
+
+6. Fine-grained Features
+앞에서 SSD를 봤을 때 이전 정보, 
+즉 maxpooling을 거치기 전에 spatial 한 정보를 합치는 행동을 했는데 이와 굉장히 비슷한 행동을 한다. 
+
+최종적으로 13x13을 사용함.
+그리고 maxpooling 하기전인 26x26도 같이 활용함.
+어떻게 하냐면, 26x26x512를 2x2등분 하고( -> 13x13x2048 로 바꿈)
+
+maxpooling 한 13x13x512에 concatenate를 진행한다. (채널을 확늘려버림)
+
+7. Multi Scale Training
+이 방법론은 근본적으로 FCN구조이기 때문에, 입력 사이즈가 달라져도 처리가 가능하다. 
+그래서 입력 이미지를 막 바꿔가면서 (물론 네모 사이즈도바뀜)
+그래서 scale invariant한 결과를 내놓음.
+
+
+
+<stronger>
+1. Hierarchical classification
+우리가 가지고 있는 분류기가 1000개 class가 있다면 이걸 좀 1000개를 넘어서서
+좀 더 많이 분류를 해보자는 취지.
+
+YOLO9000의 9000은 9천개의 class 분류를 할 수 있다는 것임.
+사실 9천개의 class분류를 하려면, 9천개의 class one-hot을 해야하는데 사실 이게 매우 어려운 이야기.
+
+이를 Hierarchical classification 로 해결함.
+원래 이미지넷은 word tree라는 구조에서 나왔음. (31:15)
+physical object - animal - mammal - ... - hunting dog - terrior 이렇게 계층이 있음.
+
+만약 우리가 가진 이미지 라벨이 요크셔테리어(Yorkshire terrior) 라고 한다면,
+이 label은 terrior이면서 동시에 hunting dog 이면서 동시에 ... physical object 임.
+
+그래서 word tree를 이용하는 방법을 취하려고 
+softmax를 써서 9천개 전체에서 고려를 하는것이 아닌,
+
+어떤 하나의 이미지가 있을 때 여러개의 label이 들어가는 거임. 
+(32:57 영상을 보면 쉽게 이해가능)
+즉, 하나의 벡터를 상위계층, 하위계층, 그 하위계층... 등으로 나눠서 분류를 할때, 
+각 계층마다 cross entropy를 만들고 softmax를 구해서 그것들의 합 또는 평균으로 해결을 하게 된다.
+이렇게 9천개 분류도 가능하게 됨.
+
+
+어떻게 하면 성능이 조금씩 개선되는지 논문에서 확인 할 수 있다.
+
+원래 YOLO에서는 작게 붙어있는 물체를 잘 잡지 못했지만, 
+YOLOv2는 region proposal NN을 이용했기 때문에 작은 size에도 잘 잡음을 알 수 있음.

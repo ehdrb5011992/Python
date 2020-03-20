@@ -1,0 +1,216 @@
+아래의 세개의 논문에 대해 살펴보도록 하자.
+
+
+--------------------------------------------------------------------------------------------------
+1. [Show and Tell_A Neural Image Caption Generator]
+
+
+Image Captioning이란 무엇일까?
+어떤 이미지가 들어왔을 때 이 이미지를 설명하는 문장을 구성하는것을 이야기함.
+
+이미지로 (시장에서 물건을 파는 사람들) 의 모습이 들어오면,
+"A group of people shopping at an outdoor market."
+혹은
+"There are many vegetables at the fruit stand." 
+등으로 대답하게 됨.
+
+이게 중요한 이유는 구글을 예로 든다면, 이미지를 통해 검색이 가능해지기 때문임.
+또 시각장애인분에게도 매우 효율적으로 적용될 수 있음. 
+카메라가 이미지를 대신 봐주고, 그걸 설명으로 내뱉는 과정을 진행하기 때문.
+
+그밖에도 여러개 의의가 있다.
+
+이것 역시 VQA와 같이 대표적인 Multimodal이다. 이미지와 문장을 고려해야함.
+다만 VQA와는 다르게, Image Captioning 은 문장을 만드는거임.
+
+
+Image Captioning이 필요한 이유
+우리가 많은 이미지들을 접하지만, 
+이 이미지들을 통해서 내가 원하는 적절한 묘사를 뽑아내는것은 어려운 일이다. 
+이를 기계가 대신 해주면 원활한 작업이 가능해진다. 
+(가령, 전문적인 분야에서는 용어를 모를수가 있어 이미지를 보더라도 묘사하는게 사람으로써는 한계가 일어날 수 있다. - 내생각)
+
+전반적인 구조는, 이미지를 CNN으로 받고 RNN으로 문장을 구사하는 것으로 됨.
+이 컨셉은 다소 새롭다. 
+
+그래서 어떻게 글자를 새롭게 만들어 낼 수 있을지에 대해 생각을 해보면 좋다.
+
+
+이 문제는 어떻게 출발이 되었는지를 살펴볼 필요가 있다. 
+기계번역을 롤모델 기준으로 삼는다.
+Machine Translation Model에서는 Encoder RNN, Decoder RNN이 있다.
+
+우리가 VQA에서는 어떤 sequence(질문)가 주어졌을 때, 
+그 sequence를 잘 설명할 수 있는 벡터를 찾기위해서 RNN에서 sequence를 넣고, 
+출력되는 마지막 cell state를 그냥 사용했으면 됐음.
+
+Machine Translation Model에서도 마찬가지이다. 
+첫 RNN(encoder RNN - 번역하고 싶은 언어 부분: 불어) 을 통과한 후에 얻어진, 
+마지막 cell state를 그다음 RNN(decoder RNN) 으로 넘겨준다. (04:47)
+ 
+Decoder RNN(내가 알아듣는 언어 부분: 영어)에서 이전에 받은 cell state로 state를 초기값으로 설정하고, 
+input으로 초기값을 정해주고 cell state의 초기값과 같이 넣으면 output이 튀어나온다.
+이 output이 튀어나온 것을 제일 큰 숫자가 나온 output을 다음 cell의 input으로 사용하는 거임. (05:20)
+(의문. 확률분포랑은 관련없나??)
+(참고1 -  https://brunch.co.kr/@linecard/324)
+(참고2 - https://lsjsj92.tistory.com/411 - RNN에 대한 기본적인 설명이 잘나와있음. (Many to Many)
+
+
+이런식으로, 이전에 있는 출력을 다음 입력으로 넣어줘서 이론상 무언가를 무한히 뽑아 낼 수 있게 된다.
+
+이렇게 만들고, EOS (end of sentence) 라는 특별한 token이 나오게 되면 그때 멈추면 된다.
+그리고 그때까지 사용한 word들을 잘 모아보면, 불어를 영어로 만들어주는 번역기가 만들어짐.
+
+Image Captioning은 여기서 착안을 얻어서, 
+encoder RNN 대신 CNN으로 걸러 내어 cell state에 초기값을 넣어주게 된다.
+
+위의 번역기에서 한가지 명심할건, 
+decoder RNN에서 받을 초기의 cell state는 이전의 RNN에서 나온 불어의 요약본으로 설명하기 충분한 값을 받게 되는거임.
+그 cell state만 가지고도 불어를 번역을 해줬다.
+
+마찬가지의 생각을 Image Captioning에서 하게 된다.
+
+그래서 Language Model이라는 것은 별게 아니라, 
+이전 단어"들"이 주어졌을 때 다음 번 단어에 대한 확률 분포임.
+그래서 일반적으로 RNN을 번역기에 적용한다고 말을 하는것의 아이디어는,
+input을 한 cell에 넣고 output을 내뱉으면, 
+그 output의 확률분포를 구성하여 하나의 셈플링을 하고 그 셈플링한 결과를 그다음 cell의 input으로 받는 반복을 진행.
+
+한가지 명심할것은, 이전 단어"들" 이다. 다음번 단어를 예측할 때는 이전에 사용된
+모든 단어들의 확률분포를 고려하기 때문에 그렇다.
+
+
+- Training Phase (08:30)
+그래서 input으로 남자가 밀짚모자를 쓰고잇는 이미지를 받고, 정답으로는 Straw hat인 것을 알고 있다고 하자.
+그러면, CNN을 거쳐서 나온 숫자들을 cell state의 초기값으로 넘겨주어서 결과가 Straw hat 이 나오게 끔 학습을 시킨다. 
+(이때는 input이 straw와 hat으로 학습됨.)
+마지막 END token이 나올때까지. (Run Time 에서도 End Token이 나올때까지 돌림)
+
+- Test Phase (09:30)
+테스트에는 이미지만 입력을 하게 되고, fc층까지 거쳐서 나온 feature들을 초기값으로 사용한 뒤에,
+추가로 input을 받아 output을 내뱉으면 그 output (단어들에 대한 이산확률분포 - 각 단어별 확률값을 지님.) 에서 
+sampling 한게 다음번 cell의 새로운 input으로 사용
+
+또는, beam search를 사용할 수 있다.
+만약 Test phase에서 말한것처럼 sampling을 하게 되면, 
+앞에서 sampling을 이상하게 전개했을 시 잘 안될 수 있다. 
+즉, 확률분포에서 sampling을 하기 때문에, 낮은 확률로 낮은 단어들도 뽑힐 수 있음.
+그래서 beam search라는 방법을 통해 하나의 단어만 뽑는것이 아닌 여러개를 뽑는것.
+
+ex) (10:30)
+output label에서 상위 4개를 뽑고, 그 4개를 뽑은걸 가지고 두번째 cell에 각각 적용
+해서 또 4개씩을 뽑는다. 그러면 16개의 후보군이 나오는데, 16개 중에서 
+10개(beam size)만큼 줄인다. 그리고 거기서 4개를 또 뽑으면 40개이고, 그걸 beam size만큼 줄이고... 이를 반복함.
+
+이때, beam size는 우리가 미리 정해놓는 값. 
+이게 얼마나 잘 나올 수 있는 sequence인지를 가지고 RNN이 돌아가게 됨. 
+이게 beam search.
+
+
+
+아래는 우리가 이후 사용할 Data set에 대한 설명
+
+Microsoft COCO dataset (MS COCO dataset) (11:43)
+12만개의 이미지와, 각 이미지에 5개의 문장이 training으로 들어가 있음.
+(사람이 만들어서 그렇다.)
+
+Transfer learning은 이전에 학습한 pre-trained CNN을 가져오는것을 의미.
+(VGG 시리즈 모형처럼 보이고, imagenet에서 pre-trained 된 값을 사용.)
+그리고 단어들도 word embedding을 통해 word2vec으로 쓰게 됨.
+
+--------------------------------------------------------------------------------------------------
+2. [Show, Attend and Tell_Neural Image Caption Generation with Visual Attention]
+
+위의 논문보다 Attention이 새롭게 추가된 걸 알 수 있음.
+이 논문은 Attention 메카니즘을 통해 Image Captioning을 함.
+
+Attention 메카니즘이란, 
+내가 가진 이미지를 보고 어느 영역에서 조합된 단어를 만들지에 대한 내용임.
+
+바꿔말해서, 어떤 이미지를 설명할 때 어떤 한 기준을 설명하고 말을 하게 된다.
+ex) 사람이 고양이옆에 있습니다. 
+
+이전에 살펴본 show and tell은 간단히 (14:30) 에 설명.
+CNN후, fc층까지 거쳐서 나온 feature 들을 사용함.
+
+show attend and tell은 (14:50)에 있음.
+위와 차이는, CNN을 통해 얻은 feature map을 사용한다는 점임. (공간정보를 유지) 
+convolutional feature map이 있고, 이게 l개 (channel이 l개 ) 있다고 하자.
+
+물리적인 의미는, 서로다른 l개의 convolution 필터로부터 얻어지는 서로 다른 l개의 response이다. 
+CAM (class activation map) 에서 GAP(global average pooling)을 했던 이유를 떠올리면 쉽다.
+
+그러면, 각각의 채널의 정보들의 weight를 구하고, 
+각각의  weighted sum을 RNN(LSTM)의 새로운 cell state 초기값(입력)으로 들어간다.
+
+중요한 것은 이 weight가 현재 output(lstm의 output), 
+즉 어떤 단어를 말했는지와 현재 feature map에 dependent한 함수임.
+
+그렇기 때문에 lstm이 어떤 단어를 말했으면, 가령 a 뒤의 단어로 bird를 말했다면, 
+그 다음번에 나올 attention은 bird가 있는 곳에서는 낮아져야 함. 
+이미 bird를 말했는데, 또다시 bird에 관심을 가질 필요가 없음.
+
+그래서 내가 이전에 말한 단어+ 현재 각각의 i-th 채널정보가 들어가 attention을 구함.
+(16:10) 이해는 그림을 보고 해보기.
+
+
+역시 attention 메커니즘을 통하면 왜 안되는지도 확인할 수 있음.
+
+--------------------------------------------------------------------------------------------------
+3. [DenseCap_Fully Convolutional Localization Networks for Dense Captioning]
+
+유명한 cs231n의 조교였던 분들이 쓴 논문. (18:33)
+
+일반적으로 detection문제는 분류 문제를 조금 더 확장한 문제를 푸는것과 동일함.
+'이미지 안에서 어떤 영역에 대한 분류를 했다' 로 말할 수 있음.
+image captioning역시 image classification의 확장이기도 함.
+
+우리가 살펴볼 Densecap은 image captioning을 Classification -> Detection처럼 확장한 거임. (19:15)
+
+즉, 하나의 이미지가 있으면 상황을 한마디로 설명할 수는 없다.
+이미지 안에서 저마다 다른 묘사를 할 수 있기 때문에 그럼.
+따라서, Densecap이란 detection한 부분에 따라 전부 이미지 설명들을 넣게 되는 것을 말함.
+
+물론 이게 가능한 이유는, 이에 맞는 데이터셋이 있음. 이미지 영역이 전부 주어져 있고, 
+각 영역마다 captioning이 주어져 있어서 training 할 수 있게 만들어 놓음.
+
+
+object detection + image captioning + soft spatial attention 을 전부 활용한 알고리즘.
+알고리즘은 다소 복잡하다. 설명은 영상을 보고(20:03) 이해하는게 좋음. 
+그림에 내용이 많음. 
+
+
+-Soft spatial attention
+
+우리가 어떤 이미지 안에서 영역을 뽑고싶다고 하자. 
+그래서 박스를 칼같이 정하는 region proposal network처럼 하지 않고, 
+보다 soft하게 만들고 싶을때 사용.
+(픽셀에 반쯤 걸 쳐 있을 수 있는 상황에서 어떻게 할지에 대한 얘기) 
+
+-Differentiable image sampling (미분이 쉽게 됨.)
+이걸 하기 위해 key 아이디어는, 2015년에 NIPS에 나온 "spatial transformer networks" 를 사용하게 된다.
+이게 뭐냐면 어떤 이미지를 가지고 있을 때, 이미지를 돌리고 싶다면 점과 점사이의 mapping을 진행하면 됨.(21:38)
+돌리기전 이미지 점들의 위치(grid)의 조합(관계)을 통해 이미지가 돌아가게끔 만드는, 
+그런 구조를 바로 spatial transformer network라고 말함. (새로운 이미지로 바꿔주게 만든다.)
+바꿔말해서, grid가 어떻게 변하는지가 spatial transformer network를 정의하는데 필요함.
+
+-Bilinear interpolation (22:35)
+위의 spatial transformer network을 위해 필요한게 bilinear interpolation 이다.
+이미지를 옮기는 과정에서 생기는 빈 픽셀에 값을 채워넣음.
+이때, 빈 픽셀에 채워지는 값은 이미지를 옮기기 전에 mapping되는, 
+그 픽셀(혹은 가상의 값)에서 1 이내의 거리에 있는 픽셀에 대해 거리에 반비례하도록 값이 채워짐.
+
+-Recognition network(25:10)
+결국 우리가 어떤 input이 있으면, conv.feature map이 나오고, region별로 동일한 차원이 됨. 
+그리고 그게 recognition network에 들어가게 된다.
+recognition network는 별다른게 아니라, image captioning을 해주는 것.
+ 
+전체적인 구조는 (25:35)
+영상보기.
+
+어디서 활용이 되냐면, Image retrieval에 도움이 될 수 있음.
+성격이 매우 비슷한 이미지들을 잘 찾을 수 있게 됨.(28:07)
+(행동이나 모습 등이)
+
+단순히 색깔이 비슷하고 모양이 비슷하고, CNN feature가 비슷하다는 것으로 이용하면 이렇게 비슷한 사진을 찾아내기 어려울 것이다.
+이런 차원에서 굉장히 많은 연구가 이루어지고 있다.
