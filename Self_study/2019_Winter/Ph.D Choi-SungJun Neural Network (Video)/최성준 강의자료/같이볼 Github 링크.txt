@@ -1,0 +1,38 @@
+1. 딥러닝 준비하기
+1) [실습] 기본 파이썬 문법 실습
+https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/basic_python.ipynb
+
+
+2. 딥러닝 들어가기
+1) [실습] 이미지 처리 실습하기
+https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/basic_imgprocess.ipynb
+2) [실습] MNIST 데이터셋 사용법 익혀보기
+https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/basic_mnist.ipynb
+3) [실습] 기본 Tensorflow 문법 실습
+https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/basic_tensorflow.ipynb
+4) [실습] Logistic Regression
+https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/logistic_regression_mnist.ipynb
+
+
+3. Convolutional Neural Network(CNN)을 이용한 Application
+1) [실습] Multilayer Perceptron(MLP) 로 숫자 분류기 구현하기
+https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/mlp_mnist_simple.ipynb
+2) [실습] Custom dataset 만들어보기
+https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/basic_gendataset.ipynb
+3) [실습] Convolutional Neural Network(CNN)으로 숫자 분류기 구현하기
+https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/cnn_mnist_simple.ipynb
+4) [실습] Custom dataset을 이용한 분류기 구현하기
+https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/basic_gendataset.ipynb
+5) [실습] 99% 정확도를 넘기는 정교한 CNN 구현하기
+-https://github.com/sjchoi86/advanced-tensorflow/blob/master/mnist/mnist_slim.ipynb
+-https://github.com/sjchoi86/advanced-tensorflow/blob/master/basic/cnn_mnist_modern.ipynb
+
+
+4. Advanced Topics
+1) [실습] RNN 실습
+- https://github.com/sjchoi86/advanced-tensorflow/blob/master/basic/rnn_mnist.ipynb
+- https://github.com/sjchoi86/advanced-tensorflow/blob/master/basic/rnn_stockpred.ipynb
+- https://github.com/sjchoi86/advanced-tensorflow/blob/master/char-rnn/char-rnn-simple.ipynb
+- https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/demo_Hangul.ipynb
+- https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/char_rnn_train_hangul.ipynb
+- https://github.com/sjchoi86/Tensorflow-101/blob/master/notebooks/char_rnn_sample_hangul.ipynb
