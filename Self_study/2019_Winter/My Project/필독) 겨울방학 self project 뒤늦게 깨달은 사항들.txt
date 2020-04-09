@@ -34,3 +34,6 @@ batch size= 20이고, 2천개의 데이터를 사용한다면 기존의 steps_pe
 
 8. ModelCheckpoint라는 메서드를 callback에서 같이 사용하므로써, EarlyStopping에 더욱 효과적으로 대응할 수 있다.
 
+9. Adam 만큼 RMSProp도 중요함. Adam으로 학습이 안되는게 RMSProp으로 되는 경우를 박유성교수님 수업 ch5_4에서 봄.
+
+
