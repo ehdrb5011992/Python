@@ -1,0 +1,54 @@
+1. output layer의 activation은 sigmoid보단, tanh를 쓰는게 좋음.
+출처 : https://data-newbie.tistory.com/121?category=753185
+
+2. learning_rate 는 10^-6과 같이 매우 낮은값에서 10배씩 키우며 점점 늘리는 방법도 있음.
+
+3. 혹은, Learning Rate finder 방법을 사용하는 것을 추천한다고 한다. 이 것은 대부분 Gradient Optimizer에서 잘 찾아준다. (Cyclical Learning Rates)
+
+4. activation function으로 relu 대신 다른 버전의 relu들 (prelu, gelu, rrelu, elu, leaky relu, ... )을 쓰면 학습속도도 빨라지고 더 좋은 성능을 기대할 수 있음.
+출처 : https://data-newbie.tistory.com/278?category=753185
+
+5. gradient clipping 에 대해서 숙지하는 것이 좋다. RNN에서 주로 씀
+출처 : https://kh-kim.gitbook.io/natural-language-processing-with-pytorch/00-cover-6/05-gradient-clipping
+
+6. Modelcheckpoint에 대해, 매 순간마다 모형을 저장하는 코드를 알고싶다면?
+출처 : https://datascience.stackexchange.com/questions/28210/keras-callback-example-for-saving-a-model-after-every-epoch
+
+7. 이미지 데이터 전처리는 scaling 만으로 전부가 되는것이 아님.
+scaling과 zero-centering은 99% 이미지 데이터에 대해 전처리로 진행되며, 이는 learning rate와 직접적으로 연관되어 학습속도와도 관련이 있음.
+이미지에서 흔히 1/255. 로 진행되는 scaling은 normalization이라고도 불리며, 1/255.인 이유는 편의상인듯 함.
+보다 정확히 하려면 min-max normalization을 진행하면 되고, 이는 인터넷 여러군대를 참고하면 쉬움.
+다만, 이미지는 0~255로 픽셀값이 명확하기 때문에 쉽게 1/255.로 진행.
+
+중요한것은 centering에 대한 내용.
+centering은 전체 데이터셋의 픽셀 평균을 내고, 이를 각 이미지 데이터에 대해 빼주는 행위를 말함.
+이때, global하게(rgb 통합해서 평균) 하는방법이 있고, local하게(rgb 각각에 대해) 하는 방법이 있음.
+후자의 방법이 효과적이기에 훨씬 많이 사용함. 이는 현재 flor_from_directory의 featurewise_center = true로 놓는 작업으로 진행함.
+물론, featurewise_std_normalization을 추가하여 데이터 전체에 대해 표준화(standardization)을 진행할 수 있음.
+이때는 scaling을 하지 않음.
+그리고 flow_from_directory의 위의 옵션들을 사용할때는 fit함수를 통해서 먼저 적용해서 평균을 뽑아내야함.
+(이 부분은 flow from directory에 있어 뭔가 명확하지 않다...- flow함수는 맞긴한거같은데..)
+(따라서 나만의 함수를 만들고, 이에따라 채널별 평균을 계산함)
+그리고, 얻어낸 mean값들을 수치로 따로 저장한다음(r,g,b각각에 대해 하나의 값씩 나옴) 이를 이후 datagen.mean에 할당하는 것으로 코딩이 이루어짐.
+
+정말 많은 글들을 봤기 때문에 출처를 다 남기지는 못함. 
+다만, 도움이 크게됐던 자료에 대해서는 출처를 남김.
+출처1 : https://machinelearningmastery.com/how-to-normalize-center-and-standardize-images-with-the-imagedatagenerator-in-keras/
+출처2 : https://machinelearningmastery.com/how-to-manually-scale-image-pixel-data-for-deep-learning/
+
+사용 방법에 대해서는 내 코드 참고
+
+
+8. 모형을 동일한 상황에서 비교하고싶다면, seed를 고정시켜야함. (모든 layer 및 전체에 고정)
+이는 재현성을 위해서도 필요함. 
+출처 : https://machinelearningmastery.com/reproducible-results-neural-networks-keras/ 
+
+9. 논문에 있는 모든 사항을 그대로 적용시킬때 accuracy가 뛰어나게 나옴. (epoch, batch size, optimizer)
+모형 비교의 경우에는 각각의 모든사항을 적용시켜서 비교해보는것이 원칙일듯 하나, 같은 상황속에서 비교해보는 일반적인 케이스를 제시하고 싶었음.
+(데이터에 따라 최적 케이스가 
+다르기 때문에서도, 일반적인 경우를 적용하고 싶었음)
+
+****** 10. weight decay와 관련하여 / L1, L2 norm에 대해 중요한 사실이 있다. 꼭 읽어보고 넘어가기
+ - 모형을 구성할때는 weight decay를 꼭 설정해야함.
+출처1 : https://m.blog.naver.com/laonple/220527647084
+출처2 : https://hiddenbeginner.github.io/deeplearning/paperreview/2019/12/29/paper_review_AdamW.html
